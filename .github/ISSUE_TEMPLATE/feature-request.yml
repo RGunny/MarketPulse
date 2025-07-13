@@ -6,13 +6,14 @@ body:
   - type: textarea
     id: summary
     attributes:
-      label: 📌 개요
-      description: 어떤 기능이 필요한가요? 왜 필요한가요?
-      placeholder: 예: 로그인 실패 시 알림 기능 필요
+      label: "📌 개요"
+      description: "어떤 기능이 필요한가요? 왜 필요한가요?"
+      placeholder: "예: 로그인 실패 시 알림 기능 필요"
   - type: textarea
     id: tasks
     attributes:
-      label: ✅ 할 일 목록
+      label: "✅ 할 일 목록"
+      description: "구현해야 할 작업 항목을 체크리스트로 작성하세요"
       value: |
         - [ ] 기능 정의
         - [ ] Controller/Service 구현
@@ -21,5 +22,5 @@ body:
   - type: input
     id: related
     attributes:
-      label: 🔗 관련 이슈/PR
-      placeholder: #12, #15
+      label: "🔗 관련 이슈/PR"
+      placeholder: "#12, #15"

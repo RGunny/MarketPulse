@@ -6,14 +6,15 @@ body:
   - type: textarea
     id: task
     attributes:
-      label: 🧹 작업 내용
-      description: 어떤 설정/작업을 진행할 예정인가요?
+      label: "🧹 작업 내용"
+      description: "어떤 설정/작업을 진행할 예정인가요?"
   - type: input
     id: target
     attributes:
-      label: 🎯 대상 환경/도구
-      placeholder: 예: GitHub Actions, nginx.conf, logback.xml
+      label: "🎯 대상 환경/도구"
+      placeholder: "예: GitHub Actions, nginx.conf, logback.xml"
   - type: textarea
     id: steps
     attributes:
-      label: 📝 작업 순서
+      label: "📝 작업 순서"
+      description: "작업 절차를 순서대로 작성해주세요"

@@ -6,12 +6,12 @@ body:
   - type: textarea
     id: behavior
     attributes:
-      label: 🐞 문제 내용
-      description: 문제가 발생한 시점, 화면, API를 적어주세요
+      label: "🐞 문제 내용"
+      description: "문제가 발생한 시점, 화면, API를 적어주세요"
   - type: textarea
     id: steps
     attributes:
-      label: 🔁 재현 절차
+      label: "🔁 재현 절차"
       value: |
         1. ...
         2. ...
@@ -19,9 +19,10 @@ body:
   - type: input
     id: env
     attributes:
-      label: 💻 환경 정보
-      placeholder: 예: Mac OS, Chrome 125, dev 서버
+      label: "💻 환경 정보"
+      placeholder: "예: Mac OS, Chrome 125, dev 서버"
   - type: textarea
     id: logs
     attributes:
-      label: 🧾 관련 로그 / 스크린샷
+      label: "🧾 관련 로그 / 스크린샷"
+      description: "예외 로그나 화면 캡처가 있으면 첨부해주세요"
