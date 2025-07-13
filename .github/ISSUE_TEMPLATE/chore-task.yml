@@ -1,0 +1,19 @@
+name: Chore Task
+description: 설정 변경, 배포 설정, CI/CD 작업 등
+title: "[Chore] "
+labels: ["chore"]
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: 🧹 작업 내용
+      description: 어떤 설정/작업을 진행할 예정인가요?
+  - type: input
+    id: target
+    attributes:
+      label: 🎯 대상 환경/도구
+      placeholder: 예: GitHub Actions, nginx.conf, logback.xml
+  - type: textarea
+    id: steps
+    attributes:
+      label: 📝 작업 순서

@@ -1,0 +1,25 @@
+name: Feature Request
+description: 새로운 기능 추가 또는 개선 요청
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 📌 개요
+      description: 어떤 기능이 필요한가요? 왜 필요한가요?
+      placeholder: 예: 로그인 실패 시 알림 기능 필요
+  - type: textarea
+    id: tasks
+    attributes:
+      label: ✅ 할 일 목록
+      value: |
+        - [ ] 기능 정의
+        - [ ] Controller/Service 구현
+        - [ ] 테스트 코드 작성
+        - [ ] 문서 작성
+  - type: input
+    id: related
+    attributes:
+      label: 🔗 관련 이슈/PR
+      placeholder: #12, #15

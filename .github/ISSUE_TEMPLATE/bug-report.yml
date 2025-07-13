@@ -1,0 +1,27 @@
+name: Bug Report
+description: 오류나 예외 발생 시 제보
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: 🐞 문제 내용
+      description: 문제가 발생한 시점, 화면, API를 적어주세요
+  - type: textarea
+    id: steps
+    attributes:
+      label: 🔁 재현 절차
+      value: |
+        1. ...
+        2. ...
+        3. ...
+  - type: input
+    id: env
+    attributes:
+      label: 💻 환경 정보
+      placeholder: 예: Mac OS, Chrome 125, dev 서버
+  - type: textarea
+    id: logs
+    attributes:
+      label: 🧾 관련 로그 / 스크린샷
