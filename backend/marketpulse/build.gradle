@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.3' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+}
+
+// 모든 프로젝트에 공통 설정 적용
+allprojects {
+    group = 'me.rgunny.marketpulse'
+    version = '1.0.0'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+// 서브 프로젝트에만 적용되는 설정
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    // libs 모듈들은 java-library + dependency-management만
+    if (project.path.startsWith(':libs:')) {
+        apply plugin: 'java-library'
+        apply plugin: 'io.spring.dependency-management'
+
+        dependencyManagement {
+            imports {
+//                mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+                mavenBom "org.springframework.boot:spring-boot-dependencies:3.5.3"
+            }
+        }
+
+        // libs 모듈들의 jar 생성 활성화
+        jar {
+            enabled = true
+            archiveClassifier = ''
+        }
+
+    } else {
+        // 비즈니스 모듈들은 Spring Boot 적용
+        apply plugin: 'org.springframework.boot'
+        apply plugin: 'io.spring.dependency-management'
+    }
+
+    // 모든 서브 프로젝트 공통 의존성
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+
+    // 테스트 설정
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
