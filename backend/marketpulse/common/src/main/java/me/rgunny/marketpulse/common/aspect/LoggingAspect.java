@@ -6,6 +6,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Aspect
 @Component
 @Slf4j
-public class ApiLoggingAspect {
+public class LoggingAspect {
 
     @Pointcut("execution(* me.rgunny.marketpulse..*Controller.*(..))")
     public void controllerPointcut() {}
@@ -25,7 +26,7 @@ public class ApiLoggingAspect {
         String traceId = generateTraceId();
         HttpServletRequest request = getCurrentRequest();
 
-        // MDC에 추적 정보 설정
+        // MDC에 추적 정보 설정 (이후 모든 로그에 자동 포함)
         MDC.put("traceId", traceId);
 
         String apiInfo = joinPoint.getTarget().getClass().getSimpleName() + "." + joinPoint.getSignature().getName();
@@ -33,35 +34,31 @@ public class ApiLoggingAspect {
         long startTime = System.currentTimeMillis();
 
         try {
-            // API 시작 로그
-            log.info("API_START [{}] {}", httpInfo, apiInfo);
+            log.info("START [{}] {}", httpInfo, apiInfo);
 
             Object result = joinPoint.proceed();
 
-            // API 성공 로그
             long executionTime = System.currentTimeMillis() - startTime;
-            log.info("API_SUCCESS [{}] {} ({}ms)", httpInfo, apiInfo, executionTime);
+            log.info("SUCCESS [{}] {} ({}ms)", httpInfo, apiInfo, executionTime);
 
             return result;
 
         } catch (Exception e) {
-            // API 실패 로그
             long executionTime = System.currentTimeMillis() - startTime;
 
             if (isBusinessException(e)) {
-                log.warn("API_BUSINESS_ERROR [{}] {} ({}ms) - {}", httpInfo, apiInfo, executionTime, e.getMessage());
+                log.warn("BUSINESS_ERROR [{}] {} ({}ms) - {}", httpInfo, apiInfo, executionTime, e.getMessage());
             } else {
-                log.error("API_SYSTEM_ERROR [{}] {} ({}ms)", httpInfo, apiInfo, executionTime, e);
+                log.error("SYSTEM_ERROR [{}] {} ({}ms)", httpInfo, apiInfo, executionTime, e);
             }
 
             throw e;
 
         } finally {
+            // 스레드 재사용되므로 정리필요
             MDC.clear();
         }
     }
-
-    // ===== 핵심 헬퍼 메서드만 =====
 
     private String generateTraceId() {
         return UUID.randomUUID().toString().substring(0, 8);

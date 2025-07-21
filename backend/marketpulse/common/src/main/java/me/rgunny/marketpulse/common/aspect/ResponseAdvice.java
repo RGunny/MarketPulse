@@ -12,8 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
-public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
-
+public class ResponseAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -43,7 +42,7 @@ public class ApiResponseAdvice implements ResponseBodyAdvice<Object> {
     private ResponseMetadata generateMetadata(ServerHttpRequest request) {
         return new ResponseMetadata(
                 LocalDateTime.now(),
-                request.getURI().getPath().toString(),
+                request.getURI().getPath(),
                 request.getMethod().name()
         );
     }

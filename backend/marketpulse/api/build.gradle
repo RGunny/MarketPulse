@@ -16,7 +16,6 @@ dependencies {
 
     // 테스트
     testImplementation 'org.springframework.kafka:spring-kafka-test'
-    testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:mysql'
     testImplementation 'org.testcontainers:kafka'
 }

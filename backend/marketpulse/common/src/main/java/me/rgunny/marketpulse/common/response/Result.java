@@ -1,55 +1,42 @@
 package me.rgunny.marketpulse.common.response;
 
+import me.rgunny.marketpulse.common.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
-import java.time.LocalDateTime;
-
 /**
- * Pattern Matching Style (Java 17+)
+ * Sealed interface(Java 17+), Record Pattern, Switch Pattern Matching (Java 21+ Standard)
  */
-public sealed interface ApiResult<T> permits ApiResult.Success, ApiResult.Failure {
+public sealed interface Result<T> permits Result.Success, Result.Failure {
 
-    /**
-     * 성공 케이스 - Record 클래스 사용
-     */
     record Success<T>(
             T data,
             String message,
-            HttpStatus status,
-            LocalDateTime timestamp
-    ) implements ApiResult<T> {
+            HttpStatus httpStatus
+    ) implements Result<T> {
 
-        // 간편 생성자들
         public Success(T data) {
-            this(data, "성공", HttpStatus.OK, LocalDateTime.now());
+            this(data, "성공", HttpStatus.OK);
         }
 
         public Success(T data, String message) {
-            this(data, message, HttpStatus.OK, LocalDateTime.now());
-        }
-
-        public Success(T data, String message, HttpStatus status) {
-            this(data, message, status, LocalDateTime.now());
+            this(data, message, HttpStatus.OK);
         }
     }
 
-    /**
-     * 실패 케이스 - Record 클래스 사용
-     */
     record Failure<T>(
-            String code,
-            String message,
-            HttpStatus status,
-            LocalDateTime timestamp
-    ) implements ApiResult<T> {
+            ErrorCode errorCode
+    ) implements Result<T> {
 
-        // 간편 생성자들
-        public Failure(String code, String message) {
-            this(code, message, HttpStatus.BAD_REQUEST, LocalDateTime.now());
+        public String code() {
+            return errorCode.code();
         }
 
-        public Failure(String code, String message, HttpStatus status) {
-            this(code, message, status, LocalDateTime.now());
+        public String message() {
+            return errorCode.message();
+        }
+
+        public HttpStatus httpStatus() {
+            return errorCode.httpStatus();
         }
     }
 
@@ -58,38 +45,23 @@ public sealed interface ApiResult<T> permits ApiResult.Success, ApiResult.Failur
     /**
      * 성공 결과 생성
      */
-    static <T> ApiResult<T> success(T data) {
+    static <T> Result<T> success(T data) {
         return new Success<>(data);
     }
 
-    static <T> ApiResult<T> success(T data, String message) {
+    static <T> Result<T> success(T data, String message) {
         return new Success<>(data, message);
     }
 
-    static <T> ApiResult<T> success(T data, String message, HttpStatus status) {
+    static <T> Result<T> success(T data, String message, HttpStatus status) {
         return new Success<>(data, message, status);
-    }
-
-    /**
-     * 빈 성공 결과
-     */
-    static ApiResult<Void> success() {
-        return new Success<>(null);
-    }
-
-    static ApiResult<Void> success(String message) {
-        return new Success<>(null, message);
     }
 
     /**
      * 실패 결과 생성
      */
-    static <T> ApiResult<T> failure(String code, String message) {
-        return new Failure<>(code, message);
-    }
-
-    static <T> ApiResult<T> failure(String code, String message, HttpStatus status) {
-        return new Failure<>(code, message, status);
+    static <T> Result<T> failure(ErrorCode errorCode) {
+        return new Failure<>(errorCode);
     }
 
     // ===== Pattern Matching Helpers =====
@@ -108,35 +80,42 @@ public sealed interface ApiResult<T> permits ApiResult.Success, ApiResult.Failur
     /**
      * 데이터 추출 (패턴 매칭 스타일)
      */
-    default T getDataOrThrow() {
+    default T dataOrThrow() {
         return switch (this) {
-            case Success(var data, var message, var status, var timestamp) -> data;
-            case Failure(var code, var message, var status, var timestamp) ->
-                    throw new RuntimeException(message);
+            case Success(var data, var message, var status) -> data;
+            case Failure<T> failure ->
+                    throw new RuntimeException(failure.message());
         };
     }
 
-    default T getDataOrElse(T defaultValue) {
+    default T dataOrElse(T defaultValue) {
         return switch (this) {
-            case Success(var data, var message, var status, var timestamp) -> data;
-            case Failure(var code, var message, var status, var timestamp) -> defaultValue;
+            case Success(var data, var message, var status) -> data;
+            case Failure<T> failure -> defaultValue;
         };
     }
 
     /**
      * HTTP 상태 및 메시지 추출
      */
-    default HttpStatus getStatus() {
+    default HttpStatus httpStatus() {
         return switch (this) {
-            case Success(var data, var message, var status, var timestamp) -> status;
-            case Failure(var code, var message, var status, var timestamp) -> status;
+            case Success(var data, var message, var status) -> status;
+            case Failure<T> failure -> failure.httpStatus();
         };
     }
 
-    default String getMessage() {
+    default String message() {
         return switch (this) {
-            case Success(var data, var message, var status, var timestamp) -> message;
-            case Failure(var code, var message, var status, var timestamp) -> message;
+            case Success(var data, var message, var status) -> message;
+            case Failure<T> failure -> failure.message();
+        };
+    }
+
+    default String code() {
+        return switch (this) {
+            case Success<T> success -> "SUCCESS";
+            case Failure<T> failure -> failure.code();
         };
     }
 
