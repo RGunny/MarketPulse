@@ -1,0 +1,113 @@
+# ?? ?? (?? ?? ??)
+spring:
+  application:
+    name: marketpulse
+
+  # AOP ??
+  aop:
+    auto: true
+    proxy-target-class: true
+
+# ?? ??
+logging:
+  # ?? ?? ?? (MDC ??)
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-}] %logger{36} - %msg%n"
+
+  # ?? ?? ??
+  level:
+    root: INFO
+    me.rgunny.marketpulse: INFO
+    me.rgunny.marketpulse.common.aspect: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+
+  # ?? ?? ?? (?????)
+  file:
+    name: logs/marketpulse.log
+
+  # ??? ??
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
+      total-size-cap: 3GB
+
+---
+# ==================== ?? ?? ?? ====================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+# ???? ??
+logging:
+  level:
+    root: DEBUG
+    me.rgunny.marketpulse: DEBUG
+    me.rgunny.marketpulse.common.aspect: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+# ==================== ?? ?? ?? ====================
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+# ???? ?? (?? ???)
+logging:
+  level:
+    root: WARN
+    me.rgunny.marketpulse: INFO
+    me.rgunny.marketpulse.common.aspect: INFO
+    org.springframework: ERROR
+    org.hibernate: ERROR
+
+  # ??????? ?? ?? ???
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%X{traceId:-}] %logger{30} - %msg%n"
+
+---
+# ==================== ??? ?? ?? ====================
+spring:
+  config:
+    activate:
+      on-profile: test
+
+# ????? ?? (???)
+logging:
+  level:
+    root: INFO
+    me.rgunny.marketpulse: DEBUG
+    me.rgunny.marketpulse.common.aspect: DEBUG
+
+  # ??? ??? ??? ??
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{traceId:-}] %logger{20} - %msg%n"
+
+---
+# ==================== ?? ?? ?? ====================
+spring:
+  config:
+    activate:
+      on-profile: local
+
+# ?? ??? (?? ??? ??)
+logging:
+  level:
+    root: DEBUG
+    me.rgunny.marketpulse: TRACE
+    me.rgunny.marketpulse.common.aspect: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.transaction: DEBUG
+
+  # ????? ???? ??
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([%X{traceId:-}]){yellow} %clr(%-5level){highlight} %clr(%logger{36}){cyan} %clr(-){faint} %msg%n"

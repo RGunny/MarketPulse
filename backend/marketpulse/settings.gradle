@@ -1,11 +1,9 @@
 rootProject.name = 'marketpulse'
 
 // 공통 라이브러리 모듈
-include 'libs:foundation'
-include 'libs:exception'
-include 'libs:aop'
+include 'common'
 
 // 비즈니스 도메인 모듈
-include 'market'
+include 'api'
 //include 'analytics'
 //include 'simulator'

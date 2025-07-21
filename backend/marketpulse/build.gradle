@@ -1,0 +1,81 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.3' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+}
+
+// 모든 프로젝트에 공통 설정 적용
+allprojects {
+    group = 'me.rgunny.marketpulse'
+    version = '1.0.0'
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+// 서브 프로젝트에만 적용되는 설정
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    // common 모듈은 라이브러리로 설정
+    if (project.name == 'common') {
+        apply plugin: 'java-library'
+        apply plugin: 'io.spring.dependency-management'
+
+        jar {
+            enabled = true
+            archiveClassifier = ''
+        }
+
+    } else {
+        // 비즈니스 모듈들은 Spring Boot 적용
+        apply plugin: 'org.springframework.boot'
+        apply plugin: 'io.spring.dependency-management'
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom("org.springframework.boot:spring-boot-dependencies:3.5.3")
+            mavenBom("org.junit:junit-bom:5.10.0")
+        }
+    }
+
+    // 모든 서브 프로젝트 공통 의존성
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+        // 단위 테스트용
+        testImplementation 'org.junit.jupiter:junit-jupiter-api'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+        // Spring Boot 통합 테스트용 (JUnit4 제거)
+        testImplementation('org.springframework.boot:spring-boot-starter-test') {
+            exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+        }
+
+        // Testcontainers 기반 테스트용 (Docker 통합 테스트)
+//        testImplementation 'org.testcontainers:junit-jupiter'
+//        testImplementation 'org.testcontainers:mysql' // 예: MySQL 통합 테스트 시
+//        testImplementation 'org.testcontainers:kafka' // 예: Kafka 테스트 시
+    }
+
+    // 테스트 설정
+    tasks.test {
+        useJUnitPlatform()
+    }
+}
