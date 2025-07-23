@@ -1,0 +1,17 @@
+market-data:
+  kis:
+    enabled: true
+    base-url: https://openapi.koreainvestment.com:9443
+    app-key: ${KIS_APP_KEY}
+    app-secret: ${KIS_APP_SECRET}
+
+  alpha-vantage:
+    enabled: false
+    base-url: https://www.alphavantage.co/query
+    api-key: ${ALPHA_VANTAGE_API_KEY}
+
+  bok: ## Bank of Korea
+    enabled: false
+    base-url: https://ecos.bok.or.kr
+    api-key: ${BOK_API_KEY}
+
