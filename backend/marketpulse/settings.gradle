@@ -4,6 +4,8 @@ rootProject.name = 'marketpulse'
 include 'common'
 
 // 비즈니스 도메인 모듈
-include 'api'
+//include 'api'
+include 'event-detection'
+include 'llm'
 //include 'analytics'
 //include 'simulator'
