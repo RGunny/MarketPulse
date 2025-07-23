@@ -1,5 +1,5 @@
 market-data:
-  kis:
+  kis: ## 한국투자증권
     enabled: true
     base-url: https://openapi.koreainvestment.com:9443
     app-key: ${KIS_APP_KEY}
