@@ -35,3 +35,13 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Environment files ###
+.env
+.env.local
+.env.*.local
+
+### Infrastructure ###
+infrastructure/local/.env
+infrastructure/dev/.env
+infrastructure/prod/.env
