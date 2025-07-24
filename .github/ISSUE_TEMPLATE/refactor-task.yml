@@ -1,6 +1,6 @@
 name: Refactoring Task
 description: 구조 개선, 성능 최적화, 코드 정리 등
-title: "[Refactor] "
+title: "refactor: "
 labels: ["refactor"]
 body:
   - type: textarea

@@ -1,6 +1,6 @@
 name: Bug Report
 description: 오류나 예외 발생 시 제보
-title: "[Bug] "
+title: "fix: "
 labels: ["bug"]
 body:
   - type: textarea
@@ -16,7 +16,7 @@ body:
         1. ...
         2. ...
         3. ...
-  - type: input
+  - type: textarea
     id: env
     attributes:
       label: "💻 환경 정보"

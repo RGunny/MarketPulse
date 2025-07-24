@@ -1,6 +1,6 @@
 name: Feature Request
 description: 새로운 기능 추가 또는 개선 요청
-title: "[Feature] "
+title: "feat: "
 labels: ["feature"]
 body:
   - type: textarea
@@ -19,7 +19,7 @@ body:
         - [ ] Controller/Service 구현
         - [ ] 테스트 코드 작성
         - [ ] 문서 작성
-  - type: input
+  - type: textarea
     id: related
     attributes:
       label: "🔗 관련 이슈/PR"

@@ -1,6 +1,6 @@
 name: Chore Task
 description: 설정 변경, 배포 설정, CI/CD 작업 등
-title: "[Chore] "
+title: "chore: "
 labels: ["chore"]
 body:
   - type: textarea
@@ -8,7 +8,7 @@ body:
     attributes:
       label: "🧹 작업 내용"
       description: "어떤 설정/작업을 진행할 예정인가요?"
-  - type: input
+  - type: textarea
     id: target
     attributes:
       label: "🎯 대상 환경/도구"
