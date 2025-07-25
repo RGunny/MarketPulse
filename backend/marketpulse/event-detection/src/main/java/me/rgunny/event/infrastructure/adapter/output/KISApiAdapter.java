@@ -2,6 +2,8 @@ package me.rgunny.event.infrastructure.adapter.output;
 
 import me.rgunny.event.application.port.output.KISApiPort;
 import me.rgunny.event.application.port.output.KISCredentialPort;
+import me.rgunny.event.application.port.output.KISTokenCachePort;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -13,12 +15,17 @@ public class KISApiAdapter implements KISApiPort {
 
     private final WebClient webClient;
     private final KISCredentialPort credentialPort;
+    private final KISTokenCachePort tokenCachePort;
+    
+    // KIS OAuth 토큰 유효시간 (24시간)
+    private static final Duration TOKEN_TTL = Duration.ofHours(24);
 
-    public KISApiAdapter(WebClient.Builder webClientBuilder, KISCredentialPort credentialPort) {
+    public KISApiAdapter(@Qualifier("kisWebClient") WebClient webClient,
+                        KISCredentialPort credentialPort,
+                        KISTokenCachePort tokenCachePort) {
         this.credentialPort = credentialPort;
-        this.webClient = webClientBuilder
-                .baseUrl(credentialPort.getBaseUrl())
-                .build();
+        this.tokenCachePort = tokenCachePort;
+        this.webClient = webClient;
     }
 
     @Override
@@ -40,10 +47,29 @@ public class KISApiAdapter implements KISApiPort {
     }
 
     @Override
+    public Mono<String> getCachedOrNewToken() {
+        return tokenCachePort.getToken()
+                .filter(token -> token != null && !token.isEmpty())
+                .switchIfEmpty(getAccessTokenAndCache())
+                .onErrorResume(error -> getAccessTokenAndCache());
+    }
+
+    @Override
     public Mono<Boolean> validateConnection() {
-        return getAccessToken()
+        return getCachedOrNewToken()
                 .map(token -> token != null && !token.isEmpty())
                 .onErrorReturn(false);
+    }
+
+    /**
+     * 새 토큰 발급 후 캐시에 저장
+     */
+    private Mono<String> getAccessTokenAndCache() {
+        return getAccessToken()
+                .flatMap(token -> 
+                    tokenCachePort.saveToken(token, TOKEN_TTL)
+                        .thenReturn(token)
+                );
     }
 
     public record KISTokenRequest(

@@ -7,8 +7,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,6 +22,18 @@ import static org.mockito.BDDMockito.then;
 @WebFluxTest(KISController.class)
 @DisplayName("KISController - /api/kis/health (medium)")
 class KISControllerTest {
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        @Primary
+        public WebClient webClient() {
+            // WebFluxTest용 WebClient Bean 등록
+            return WebClient.builder()
+                    .baseUrl("http://localhost:8080")
+                    .build();
+        }
+    }
 
     @Autowired
     private WebTestClient webTestClient;
