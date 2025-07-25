@@ -31,13 +31,13 @@ public class KISConnectionService implements CheckKISConnectionUseCase {
 
         long startTime = System.currentTimeMillis();
 
-        return apiPort.validateConnection()
-                .map(connected -> {
+        return apiPort.getCachedOrNewToken()
+                .map(token -> {
                     long responseTime = System.currentTimeMillis() - startTime;
-                    String message = connected ? "Connection successful" : "Connection failed";
+                    String message = "Connection successful with cached token";
 
                     return new KISConnectionStatus(
-                            connected,
+                            true,
                             message,
                             credentialPort.getMaskedAppKey(),
                             responseTime

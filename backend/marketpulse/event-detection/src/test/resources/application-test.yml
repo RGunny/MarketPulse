@@ -19,7 +19,10 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
-# KIS API 테스트 비활성화
+# KIS API 테스트 설정
 market-data:
   kis:
     enabled: false
+    base-url: "https://openapi.koreainvestment.com:9443"
+    app-key: "test-app-key"
+    app-secret: "test-app-secret"
