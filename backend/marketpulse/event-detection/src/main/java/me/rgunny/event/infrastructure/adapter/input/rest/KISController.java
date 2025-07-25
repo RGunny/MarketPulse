@@ -17,8 +17,8 @@ public class KISController {
         this.checkKISConnectionUseCase = checkKISConnectionUseCase;
     }
 
-    @GetMapping("/health")
-    public Mono<KISConnectionStatus> checkConnection() {
+    @GetMapping("/oauth")
+    public Mono<KISConnectionStatus> validateToken() {
         return checkKISConnectionUseCase.checkConnection();
     }
 }
