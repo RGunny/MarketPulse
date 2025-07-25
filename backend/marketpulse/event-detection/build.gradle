@@ -4,9 +4,6 @@ dependencies {
 
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    
-    // MongoDB
-    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 
     // 테스트
     testImplementation 'io.projectreactor:reactor-test'

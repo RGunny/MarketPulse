@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active: test
-    
   data:
     # MongoDB 테스트 설정 (TestContainers가 동적으로 설정)
     mongodb:
@@ -15,7 +12,7 @@ spring:
 # 암호화 설정
 app:
   encryption:
-    master-key: test-master-key-1234567890123456789012345678901234567890123456789012
+    master-key: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 # KIS API 테스트 설정
 market-data:
