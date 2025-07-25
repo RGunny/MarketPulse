@@ -4,11 +4,15 @@ dependencies {
 
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    
+    // MongoDB
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 
     // 테스트
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:mongodb'
     testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
 }
 
