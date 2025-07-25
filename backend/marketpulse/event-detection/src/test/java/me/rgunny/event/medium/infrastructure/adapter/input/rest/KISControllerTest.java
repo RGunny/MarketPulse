@@ -20,7 +20,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @WebFluxTest(KISController.class)
-@DisplayName("KISController - /api/kis/health (medium)")
+@DisplayName("KISController - /api/kis/oauth (medium)")
 class KISControllerTest {
 
     @TestConfiguration
@@ -56,7 +56,7 @@ class KISControllerTest {
 
         // when & then
         webTestClient.get()
-                .uri("/api/kis/health")
+                .uri("/api/kis/oauth")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(KISConnectionStatus.class)
@@ -85,7 +85,7 @@ class KISControllerTest {
 
         // when & then
         webTestClient.get()
-                .uri("/api/kis/health")
+                .uri("/api/kis/oauth")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(KISConnectionStatus.class)
@@ -114,7 +114,7 @@ class KISControllerTest {
 
         // when & then
         webTestClient.get()
-                .uri("/api/kis/health")
+                .uri("/api/kis/oauth")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(KISConnectionStatus.class)
@@ -137,7 +137,7 @@ class KISControllerTest {
 
         // when & then
         webTestClient.get()
-                .uri("/api/kis/health")
+                .uri("/api/kis/oauth")
                 .exchange()
                 .expectStatus().is5xxServerError();
 
