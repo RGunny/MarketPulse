@@ -3,13 +3,13 @@ package me.rgunny.event.medium.infrastructure.adapter.output;
 import me.rgunny.event.application.port.output.KISCredentialPort;
 import me.rgunny.event.application.port.output.KISTokenCachePort;
 import me.rgunny.event.infrastructure.adapter.output.KISApiAdapter;
+import me.rgunny.event.infrastructure.config.KISApiProperties;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -30,7 +30,6 @@ import static org.mockito.BDDMockito.then;
  * MockWebServer를 사용하여 실제 HTTP 통신을 시뮬레이션합니다.
  * 이는 실무에서 외부 API 연동을 테스트하는 표준 방법입니다.
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("KISApiAdapter - HTTP 통합 테스트 (medium)")
 class KISApiAdapterMediumTest {
 
@@ -39,6 +38,7 @@ class KISApiAdapterMediumTest {
     
     @Mock private KISCredentialPort credentialPort;
     @Mock private KISTokenCachePort tokenCachePort;
+    @Mock private KISApiProperties kisApiProperties;
     
     private static final String TEST_APP_KEY = "test-app-key";
     private static final String TEST_APP_SECRET = "test-app-secret";
@@ -46,6 +46,9 @@ class KISApiAdapterMediumTest {
 
     @BeforeEach
     void setUp() throws IOException {
+        // Mockito 초기화
+        MockitoAnnotations.openMocks(this);
+        
         // MockWebServer 시작
         mockWebServer = new MockWebServer();
         mockWebServer.start();
@@ -57,11 +60,7 @@ class KISApiAdapterMediumTest {
                 .build();
         
         // Adapter 생성
-        kisApiAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort);
-        
-        // 기본 Mock 설정
-        given(credentialPort.getDecryptedAppKey()).willReturn(TEST_APP_KEY);
-        given(credentialPort.getDecryptedAppSecret()).willReturn(TEST_APP_SECRET);
+        kisApiAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, kisApiProperties);
     }
 
     @AfterEach
@@ -77,6 +76,10 @@ class KISApiAdapterMediumTest {
         @DisplayName("정상적인 토큰 발급 요청과 응답을 처리한다")
         void givenValidRequest_whenGetAccessToken_thenReturnsToken() throws InterruptedException {
             // given
+            given(credentialPort.getDecryptedAppKey()).willReturn(TEST_APP_KEY);
+            given(credentialPort.getDecryptedAppSecret()).willReturn(TEST_APP_SECRET);
+            setupTokenProperties();
+            
             String responseBody = """
                 {
                     "access_token": "%s",
@@ -103,7 +106,7 @@ class KISApiAdapterMediumTest {
             assertThat(request).isNotNull();
             assertThat(request.getMethod()).isEqualTo("POST");
             assertThat(request.getPath()).isEqualTo("/oauth2/tokenP");
-            assertThat(request.getHeader("Content-Type")).isEqualTo("application/json");
+            assertThat(request.getHeader("Content-Type")).isEqualTo("application/json; charset=utf-8");
             
             // 요청 본문 검증
             String requestBody = request.getBody().readUtf8();
@@ -116,6 +119,10 @@ class KISApiAdapterMediumTest {
         @DisplayName("401 에러 시 적절한 예외를 발생시킨다")
         void givenUnauthorized_whenGetAccessToken_thenThrowsException() {
             // given
+            given(credentialPort.getDecryptedAppKey()).willReturn(TEST_APP_KEY);
+            given(credentialPort.getDecryptedAppSecret()).willReturn(TEST_APP_SECRET);
+            setupTokenProperties();
+            
             mockWebServer.enqueue(new MockResponse()
                     .setResponseCode(401)
                     .setHeader("Content-Type", "application/json")
@@ -135,6 +142,10 @@ class KISApiAdapterMediumTest {
         @DisplayName("네트워크 타임아웃을 적절히 처리한다")
         void givenTimeout_whenGetAccessToken_thenHandlesTimeout() {
             // given
+            given(credentialPort.getDecryptedAppKey()).willReturn(TEST_APP_KEY);
+            given(credentialPort.getDecryptedAppSecret()).willReturn(TEST_APP_SECRET);
+            setupTokenProperties();
+            
             // 실무에서는 실제 타임아웃을 기다리지 않고 빠르게 실패하도록 설정
             mockWebServer.enqueue(new MockResponse()
                     .setResponseCode(200)
@@ -147,7 +158,7 @@ class KISApiAdapterMediumTest {
                     .build();
             
             // 테스트용 짧은 타임아웃을 가진 adapter 생성
-            KISApiAdapter testAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort) {
+            KISApiAdapter testAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, kisApiProperties) {
                 @Override
                 public Mono<String> getAccessToken() {
                     // 테스트를 위해 50ms 타임아웃 적용
@@ -173,6 +184,10 @@ class KISApiAdapterMediumTest {
         @DisplayName("캐시 미스 시 API 호출 후 캐시에 저장한다")
         void givenCacheMiss_whenGetCachedOrNewToken_thenFetchesAndCaches() throws InterruptedException {
             // given
+            given(credentialPort.getDecryptedAppKey()).willReturn(TEST_APP_KEY);
+            given(credentialPort.getDecryptedAppSecret()).willReturn(TEST_APP_SECRET);
+            setupTokenProperties();
+            
             given(tokenCachePort.getToken()).willReturn(Mono.empty());
             given(tokenCachePort.saveToken(eq(TEST_TOKEN), any(Duration.class)))
                     .willReturn(Mono.empty());
@@ -211,6 +226,10 @@ class KISApiAdapterMediumTest {
         @DisplayName("연속 호출 시 캐시를 활용하여 API 호출을 최소화한다")
         void givenMultipleCalls_whenGetCachedOrNewToken_thenUsesCache() {
             // given
+            given(credentialPort.getDecryptedAppKey()).willReturn(TEST_APP_KEY);
+            given(credentialPort.getDecryptedAppSecret()).willReturn(TEST_APP_SECRET);
+            setupTokenProperties();
+            
             // 첫 번째 호출: 캐시 미스
             given(tokenCachePort.getToken())
                     .willReturn(Mono.empty())
@@ -248,5 +267,19 @@ class KISApiAdapterMediumTest {
             // API는 한 번만 호출됨
             assertThat(mockWebServer.getRequestCount()).isEqualTo(1);
         }
+    }
+    
+    // 테스트별 속성 모킹 헬퍼 메서드
+    private void setupTokenProperties() {
+        given(kisApiProperties.grantType()).willReturn("client_credentials");
+        given(kisApiProperties.tokenPath()).willReturn("/oauth2/tokenP");
+        
+        KISApiProperties.Headers headers = new KISApiProperties.Headers(
+            "tr_id", "tr_cont", "custtype", "P", "application/json; charset=utf-8"
+        );
+        given(kisApiProperties.headers()).willReturn(headers);
+        
+        KISApiProperties.Timeouts timeouts = new KISApiProperties.Timeouts(10, 30, 30, 60);
+        given(kisApiProperties.timeouts()).willReturn(timeouts);
     }
 }

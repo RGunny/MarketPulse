@@ -1,0 +1,21 @@
+#spring:
+#  data:
+#    # MongoDB 테스트 설정 (TestContainers가 동적으로 설정)
+#    mongodb:
+#      auto-index-creation: true
+#
+#    # Redis 테스트 설정
+#    redis:
+#      host: localhost
+#      port: 6379
+#
+## 암호화 설정
+#app:
+#  encryption:
+#    master-key: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+#
+## 로깅 설정
+#logging:
+#  level:
+#    me.rgunny.marketpulse: DEBUG
+#    org.springframework.data.mongodb: DEBUG
