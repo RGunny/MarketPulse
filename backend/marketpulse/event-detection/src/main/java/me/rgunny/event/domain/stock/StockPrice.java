@@ -2,6 +2,7 @@ package me.rgunny.event.domain.stock;
 
 import lombok.Builder;
 import lombok.Getter;
+import me.rgunny.event.domain.constants.BusinessConstants;
 import me.rgunny.event.domain.market.MarketDataType;
 import me.rgunny.event.domain.market.MarketDataValue;
 import org.springframework.data.annotation.Id;
@@ -130,10 +131,11 @@ public class StockPrice implements MarketDataValue {
     public StockPrice updatePrice(BigDecimal newPrice, Long newVolume, 
                                   BigDecimal newAskPrice, BigDecimal newBidPrice) {
         BigDecimal newChange = previousClose != null ? 
-            newPrice.subtract(previousClose) : BigDecimal.ZERO;
-        BigDecimal newChangeRate = previousClose != null && previousClose.compareTo(BigDecimal.ZERO) != 0 ? 
-            newChange.divide(previousClose, 4, java.math.RoundingMode.HALF_UP).multiply(new BigDecimal("100")) : 
-            BigDecimal.ZERO;
+            newPrice.subtract(previousClose) : BusinessConstants.ZERO;
+        BigDecimal newChangeRate = previousClose != null && previousClose.compareTo(BusinessConstants.ZERO) != 0 ? 
+            newChange.divide(previousClose, BusinessConstants.CALCULATION_DECIMAL_PLACES, java.math.RoundingMode.HALF_UP)
+                    .multiply(BusinessConstants.PERCENTAGE_MULTIPLIER) : 
+            BusinessConstants.ZERO;
             
         return new StockPrice(
             this.id, this.symbol, this.name, newPrice, this.previousClose,
@@ -148,10 +150,11 @@ public class StockPrice implements MarketDataValue {
                                           BigDecimal previousClose, BigDecimal high, BigDecimal low,
                                           BigDecimal open, Long volume, BigDecimal askPrice1, BigDecimal bidPrice1) {
         LocalDateTime now = LocalDateTime.now();
-        BigDecimal change = previousClose != null ? currentPrice.subtract(previousClose) : BigDecimal.ZERO;
-        BigDecimal changeRate = previousClose != null && previousClose.compareTo(BigDecimal.ZERO) != 0 ? 
-            change.divide(previousClose, 4, java.math.RoundingMode.HALF_UP).multiply(new BigDecimal("100")) : 
-            BigDecimal.ZERO;
+        BigDecimal change = previousClose != null ? currentPrice.subtract(previousClose) : BusinessConstants.ZERO;
+        BigDecimal changeRate = previousClose != null && previousClose.compareTo(BusinessConstants.ZERO) != 0 ? 
+            change.divide(previousClose, BusinessConstants.CALCULATION_DECIMAL_PLACES, java.math.RoundingMode.HALF_UP)
+                    .multiply(BusinessConstants.PERCENTAGE_MULTIPLIER) : 
+            BusinessConstants.ZERO;
             
         return new StockPrice(
             null,  // MongoDB가 ObjectId 자동 생성

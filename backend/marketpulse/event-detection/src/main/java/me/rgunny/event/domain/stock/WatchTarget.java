@@ -2,6 +2,7 @@ package me.rgunny.event.domain.stock;
 
 import lombok.Builder;
 import lombok.Getter;
+import me.rgunny.event.domain.constants.BusinessConstants;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -50,7 +51,7 @@ public class WatchTarget {
     
     // 비즈니스 메서드
     public boolean isHighPriority() {
-        return priority <= 3;
+        return priority <= BusinessConstants.HIGH_PRIORITY_THRESHOLD;
     }
     
     public boolean shouldCollectNow(LocalDateTime lastCollectionTime) {

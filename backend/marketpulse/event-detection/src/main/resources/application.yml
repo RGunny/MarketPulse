@@ -32,6 +32,28 @@ market-data:
     base-url: https://openapi.koreainvestment.com:9443
     app-key: ENC(ASeLjrVsngF75xUe5V7rd7P6uMxohHxFjrvAih4fKyPG4mxMw0TbrRhahtbBBUzuc/HmmHdNYCENk78L4sMiHA==)
     app-secret: ENC(Wu7f5NX4BhO8QwL7D6+eHI5EOo99sdF0Vmg/ZMFoYS52ShLhVVFV+Y7vk96rTkM9aguiPDWnhfG/q15Z6OsR4FPQiZuF+RpGpkeW2P4R6D/WGFX7RWunP+C+fXgC3mysYh7MbOtbm0sxGXsrtss/0ZlVBcnzmrG24nWTBrV1qGt7l9Yku9LZbM6+MHUkfmBkZLR4e3yzI9PsT32aJpQd1GiROOvShRPEFeZx5ZBSCr7s2vmnvXqQtIHyGpcdvf+V/eNQLtB5m1bDmV/OILdxD+wzDYnIRxl0)
+    
+    # API 경로 설정
+    stock-price-transaction-id: FHKST01010100
+    grant-type: client_credentials
+    token-path: /oauth2/tokenP
+    stock-price-path: /uapi/domestic-stock/v1/quotations/inquire-price
+    health-path: /oauth2/tokenP
+    
+    # 헤더 설정
+    headers:
+      transaction-id: tr_id
+      continuation-key: tr_cont
+      cust-type: custtype
+      personal-customer-type: P
+      content-type: application/json; charset=utf-8
+    
+    # 타임아웃 설정
+    timeouts:
+      connection-timeout-seconds: 10
+      read-timeout-seconds: 30
+      write-timeout-seconds: 30
+      response-timeout-seconds: 60
 
   alpha-vantage:
     enabled: false

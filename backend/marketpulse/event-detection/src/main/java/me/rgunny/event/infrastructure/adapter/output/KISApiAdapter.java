@@ -1,11 +1,13 @@
 package me.rgunny.event.infrastructure.adapter.output;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.RequiredArgsConstructor;
 import me.rgunny.event.application.error.KisApiException;
 import me.rgunny.event.application.port.output.KISApiPort;
 import me.rgunny.event.application.port.output.KISCredentialPort;
 import me.rgunny.event.application.port.output.KISTokenCachePort;
 import me.rgunny.event.domain.stock.StockPrice;
+import me.rgunny.event.infrastructure.config.KISApiProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -16,34 +18,29 @@ import java.time.Duration;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class KISApiAdapter implements KISApiPort {
 
+    @Qualifier("kisWebClient")
     private final WebClient webClient;
     private final KISCredentialPort credentialPort;
     private final KISTokenCachePort tokenCachePort;
+    private final KISApiProperties kisApiProperties;
     
     // KIS OAuth 토큰 유효시간 (24시간)
     private static final Duration TOKEN_TTL = Duration.ofHours(24);
 
-    public KISApiAdapter(@Qualifier("kisWebClient") WebClient webClient,
-                        KISCredentialPort credentialPort,
-                        KISTokenCachePort tokenCachePort) {
-        this.credentialPort = credentialPort;
-        this.tokenCachePort = tokenCachePort;
-        this.webClient = webClient;
-    }
-
     @Override
     public Mono<String> getAccessToken() {
         KISTokenRequest request = new KISTokenRequest(
-                "client_credentials",
+                kisApiProperties.grantType(),
                 credentialPort.getDecryptedAppKey(),
                 credentialPort.getDecryptedAppSecret()
         );
 
         return webClient.post()
-                .uri("/oauth2/tokenP")
-                .header("Content-Type", "application/json")
+                .uri(kisApiProperties.tokenPath())
+                .header("Content-Type", kisApiProperties.headers().contentType())
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(KISTokenResponse.class)
@@ -70,16 +67,16 @@ public class KISApiAdapter implements KISApiPort {
     public Mono<StockPrice> getCurrentPrice(String symbol) {
         return getCachedOrNewToken()
                 .flatMap(token -> webClient.get()
-                        .uri("/uapi/domestic-stock/v1/quotations/inquire-price?fid_cond_mrkt_div_code=J&fid_input_iscd={symbol}", symbol)
-                        .header("Content-Type", "application/json")
+                        .uri(kisApiProperties.stockPricePath() + "?fid_cond_mrkt_div_code=J&fid_input_iscd={symbol}", symbol)
+                        .header("Content-Type", kisApiProperties.headers().contentType())
                         .header("authorization", "Bearer " + token)
                         .header("appkey", credentialPort.getDecryptedAppKey())
                         .header("appsecret", credentialPort.getDecryptedAppSecret())
-                        .header("tr_id", "FHKST01010100")
+                        .header(kisApiProperties.headers().transactionId(), kisApiProperties.stockPriceTransactionId())
                         .retrieve()
                         .bodyToMono(KISCurrentPriceResponse.class)
                         .map(response -> mapToStockPrice(symbol, response))
-                        .timeout(Duration.ofSeconds(10)));
+                        .timeout(Duration.ofSeconds(kisApiProperties.timeouts().responseTimeoutSeconds())));
     }
 
     /**

@@ -5,7 +5,7 @@ import me.rgunny.event.infrastructure.repository.StockPriceRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -22,7 +22,14 @@ import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+/**
+ * MongoDB 연결 및 데이터 액세스 Medium 테스트
+ * 
+ * - Spring Boot 테스트 슬라이스 사용 (@DataMongoTest)
+ * - TestContainers로 실제 MongoDB 환경 시뮬레이션
+ * - Repository 계층과 데이터베이스 통합 검증
+ */
+@DataMongoTest
 @Testcontainers
 @ActiveProfiles("test")
 @DisplayName("MongoDB 연결 테스트 (medium)")

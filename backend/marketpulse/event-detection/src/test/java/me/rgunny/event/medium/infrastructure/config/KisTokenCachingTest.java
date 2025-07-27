@@ -3,16 +3,11 @@ package me.rgunny.event.medium.infrastructure.config;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.test.autoconfigure.data.redis.DataRedisTest;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -21,23 +16,18 @@ import reactor.test.StepVerifier;
 
 import java.time.Duration;
 
-@SpringBootTest
-@ActiveProfiles("test")
+/**
+ * KIS OAuth 토큰 캐싱 Medium 테스트
+ * 
+ * - Spring Boot 테스트 슬라이스 사용 (@DataRedisTest)
+ * - TestContainers로 실제 Redis 환경 시뮬레이션
+ * - 외부 시스템과의 통합 검증
+ */
+@DataRedisTest
 @Testcontainers
+@ActiveProfiles("test")
 @DisplayName("Event Detection - KIS 토큰 캐싱 테스트 (medium)")
 class KisTokenCachingTest {
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        @Primary
-        public WebClient webClient() {
-            // Medium 테스트용 WebClient Bean 등록 (외부 API 호출 없이 테스트)
-            return WebClient.builder()
-                    .baseUrl("http://localhost:8080")
-                    .build();
-        }
-    }
 
     @Container
     static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
@@ -50,7 +40,6 @@ class KisTokenCachingTest {
     }
 
     @Autowired
-    @Qualifier("reactiveRedisTemplate")
     private ReactiveRedisTemplate<String, String> reactiveRedisTemplate;
 
     @Test

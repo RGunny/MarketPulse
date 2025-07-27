@@ -1,4 +1,4 @@
-package me.rgunny.event.infrastructure.adapter.output.properties;
+package me.rgunny.event.infrastructure.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
