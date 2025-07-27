@@ -1,5 +1,6 @@
 package me.rgunny.event.application.port.output;
 
+import me.rgunny.event.domain.stock.StockPrice;
 import reactor.core.publisher.Mono;
 
 public interface KISApiPort {
@@ -21,4 +22,11 @@ public interface KISApiPort {
      * @return 연결 성공 여부
      */
     Mono<Boolean> validateConnection();
+    
+    /**
+     * 종목 현재가 조회
+     * @param symbol 종목코드 (예: 005930)
+     * @return 현재가 정보
+     */
+    Mono<StockPrice> getCurrentPrice(String symbol);
 }
