@@ -2,6 +2,7 @@ package me.rgunny.event.unit.infrastructure.adapter.output;
 
 import me.rgunny.event.application.port.output.KISCredentialPort;
 import me.rgunny.event.application.port.output.KISTokenCachePort;
+import me.rgunny.event.domain.stock.StockPrice;
 import me.rgunny.event.infrastructure.adapter.output.KISApiAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,8 +21,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -263,6 +266,103 @@ class KISApiAdapterTest {
         }
     }
 
+    @Nested
+    @DisplayName("getCurrentPrice() - 종목 현재가 조회")
+    class GetCurrentPriceTests {
+
+        @Test
+        @DisplayName("성공적으로 현재가를 조회하고 StockPrice로 매핑한다")
+        void givenValidSymbol_whenGetCurrentPrice_thenReturnsStockPrice() {
+            // given
+            String symbol = "005930";
+            given(tokenCachePort.getToken()).willReturn(Mono.just(TEST_TOKEN));
+            setupSuccessfulCurrentPriceResponse();
+
+            // when
+            Mono<StockPrice> result = kisApiAdapter.getCurrentPrice(symbol);
+
+            // then
+            StepVerifier.create(result)
+                    .assertNext(stockPrice -> {
+                        assertThat(stockPrice.getSymbol()).isEqualTo(symbol);
+                        assertThat(stockPrice.getCurrentPrice()).isEqualByComparingTo(new BigDecimal("71000"));
+                        assertThat(stockPrice.getPreviousClose()).isEqualByComparingTo(new BigDecimal("70000"));
+                        assertThat(stockPrice.getHigh()).isEqualByComparingTo(new BigDecimal("71500"));
+                        assertThat(stockPrice.getLow()).isEqualByComparingTo(new BigDecimal("70500"));
+                        assertThat(stockPrice.getOpen()).isEqualByComparingTo(new BigDecimal("70800"));
+                        assertThat(stockPrice.getVolume()).isEqualTo(1000000L);
+                        assertThat(stockPrice.getAskPrice1()).isEqualByComparingTo(new BigDecimal("71100"));
+                        assertThat(stockPrice.getBidPrice1()).isEqualByComparingTo(new BigDecimal("70900"));
+                    })
+                    .verifyComplete();
+
+            then(exchangeFunction).should().exchange(any(ClientRequest.class));
+        }
+
+        @Test
+        @DisplayName("토큰이 없으면 새로 발급받아 API 호출한다")
+        void givenNoToken_whenGetCurrentPrice_thenFetchesTokenAndCallsApi() {
+            // given
+            String symbol = "005930";
+            given(tokenCachePort.getToken())
+                    .willReturn(Mono.empty()) // 첫 번째 호출: 캐시 미스
+                    .willReturn(Mono.just(TEST_TOKEN)); // 두 번째 호출: 토큰 저장 후
+            given(tokenCachePort.saveToken(TEST_TOKEN, TOKEN_TTL)).willReturn(Mono.empty());
+            
+            // 토큰 발급 응답과 현재가 조회 응답을 순서대로 설정
+            setupSequentialResponses();
+
+            // when
+            Mono<StockPrice> result = kisApiAdapter.getCurrentPrice(symbol);
+
+            // then
+            StepVerifier.create(result)
+                    .assertNext(stockPrice -> {
+                        assertThat(stockPrice.getSymbol()).isEqualTo(symbol);
+                        assertThat(stockPrice.getCurrentPrice()).isEqualByComparingTo(new BigDecimal("71000"));
+                    })
+                    .verifyComplete();
+
+            // 토큰 발급과 현재가 조회 모두 호출되어야 함
+            then(exchangeFunction).should(times(2)).exchange(any(ClientRequest.class));
+        }
+
+        @Test
+        @DisplayName("API 에러를 적절히 처리한다")
+        void givenApiError_whenGetCurrentPrice_thenHandlesError() {
+            // given
+            String symbol = "005930";
+            given(tokenCachePort.getToken()).willReturn(Mono.just(TEST_TOKEN));
+            setupFailedCurrentPriceResponse();
+
+            // when
+            Mono<StockPrice> result = kisApiAdapter.getCurrentPrice(symbol);
+
+            // then
+            StepVerifier.create(result)
+                    .expectError()
+                    .verify();
+        }
+
+        @Test
+        @DisplayName("타임아웃이 적용된다")
+        void givenSlowResponse_whenGetCurrentPrice_thenTimesOut() {
+            // given
+            String symbol = "005930";
+            given(tokenCachePort.getToken()).willReturn(Mono.just(TEST_TOKEN));
+            setupDelayedCurrentPriceResponse();
+
+            // when
+            Mono<StockPrice> result = kisApiAdapter.getCurrentPrice(symbol);
+
+            // then
+            StepVerifier.withVirtualTime(() -> result)
+                    .thenAwait(Duration.ofSeconds(11))
+                    .expectError()
+                    .verify();
+        }
+    }
+
     // === Helper Methods ===
 
     private void setupSuccessfulTokenResponse() {
@@ -310,5 +410,126 @@ class KISApiAdapterTest {
         // 11초 지연 후 응답
         given(exchangeFunction.exchange(any(ClientRequest.class)))
                 .willReturn(Mono.just(mockResponse).delayElement(Duration.ofSeconds(11)));
+    }
+
+    private void setupSuccessfulCurrentPriceResponse() {
+        String responseBody = """
+            {
+                "rt_cd": "0",
+                "msg_cd": "AAPL000000",
+                "msg1": "정상처리되었습니다.",
+                "output": {
+                    "stck_prpr": "71000",
+                    "prdy_vrss": "1000",
+                    "prdy_vrss_sign": "2",
+                    "prdy_ctrt": "1.43",
+                    "stck_prdy_clpr": "70000",
+                    "acml_vol": "1000000",
+                    "askp1": "71100",
+                    "bidp1": "70900",
+                    "stck_hgpr": "71500",
+                    "stck_lwpr": "70500",
+                    "stck_oprc": "70800"
+                }
+            }
+            """;
+
+        ClientResponse mockResponse = ClientResponse.create(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(responseBody)
+                .build();
+
+        given(exchangeFunction.exchange(any(ClientRequest.class)))
+                .willReturn(Mono.just(mockResponse));
+    }
+
+    private void setupFailedCurrentPriceResponse() {
+        ClientResponse mockResponse = ClientResponse.create(HttpStatus.BAD_REQUEST)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body("{\"rt_cd\":\"1\",\"msg1\":\"잘못된 종목코드입니다\"}")
+                .build();
+
+        given(exchangeFunction.exchange(any(ClientRequest.class)))
+                .willReturn(Mono.just(mockResponse));
+    }
+
+    private void setupDelayedCurrentPriceResponse() {
+        String responseBody = """
+            {
+                "rt_cd": "0",
+                "msg_cd": "AAPL000000",
+                "msg1": "정상처리되었습니다.",
+                "output": {
+                    "stck_prpr": "71000",
+                    "prdy_vrss": "1000",
+                    "prdy_vrss_sign": "2",
+                    "prdy_ctrt": "1.43",
+                    "stck_prdy_clpr": "70000",
+                    "acml_vol": "1000000",
+                    "askp1": "71100",
+                    "bidp1": "70900",
+                    "stck_hgpr": "71500",
+                    "stck_lwpr": "70500",
+                    "stck_oprc": "70800"
+                }
+            }
+            """;
+
+        ClientResponse mockResponse = ClientResponse.create(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(responseBody)
+                .build();
+
+        // 11초 지연 후 응답
+        given(exchangeFunction.exchange(any(ClientRequest.class)))
+                .willReturn(Mono.just(mockResponse).delayElement(Duration.ofSeconds(11)));
+    }
+
+    private void setupSequentialResponses() {
+        // 토큰 발급 응답
+        String tokenResponseBody = """
+            {
+                "access_token": "%s",
+                "token_type": "Bearer",
+                "expires_in": 86400
+            }
+            """.formatted(TEST_TOKEN);
+
+        ClientResponse tokenResponse = ClientResponse.create(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(tokenResponseBody)
+                .build();
+
+        // 현재가 조회 응답
+        String priceResponseBody = """
+            {
+                "rt_cd": "0",
+                "msg_cd": "AAPL000000",
+                "msg1": "정상처리되었습니다.",
+                "output": {
+                    "stck_prpr": "71000",
+                    "prdy_vrss": "1000",
+                    "prdy_vrss_sign": "2",
+                    "prdy_ctrt": "1.43",
+                    "stck_prdy_clpr": "70000",
+                    "acml_vol": "1000000",
+                    "askp1": "71100",
+                    "bidp1": "70900",
+                    "stck_hgpr": "71500",
+                    "stck_lwpr": "70500",
+                    "stck_oprc": "70800"
+                }
+            }
+            """;
+
+        ClientResponse priceResponse = ClientResponse.create(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(priceResponseBody)
+                .build();
+
+        // 순차적으로 다른 응답 반환
+        given(exchangeFunction.exchange(any(ClientRequest.class)))
+                .willReturn(Mono.just(tokenResponse))     // 첫 번째 호출: 토큰 발급
+                .willReturn(Mono.just(priceResponse));    // 두 번째 호출: 현재가 조회
     }
 }
