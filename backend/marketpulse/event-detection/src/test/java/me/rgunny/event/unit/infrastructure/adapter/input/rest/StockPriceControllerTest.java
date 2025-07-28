@@ -1,6 +1,6 @@
 package me.rgunny.event.unit.infrastructure.adapter.input.rest;
 
-import me.rgunny.event.application.error.StockPriceErrorCode;
+import me.rgunny.event.shared.application.error.StockPriceErrorCode;
 import me.rgunny.event.application.port.input.GetStockPriceUseCase;
 import me.rgunny.event.domain.stock.StockPrice;
 import me.rgunny.event.infrastructure.adapter.input.rest.StockPriceController;

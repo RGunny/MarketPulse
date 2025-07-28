@@ -3,7 +3,7 @@ package me.rgunny.event.unit.infrastructure.adapter.output;
 import me.rgunny.event.domain.stock.WatchCategory;
 import me.rgunny.event.domain.stock.WatchTarget;
 import me.rgunny.event.infrastructure.adapter.output.WatchTargetAdapter;
-import me.rgunny.event.infrastructure.config.StockCollectionProperties;
+import me.rgunny.event.marketdata.infrastructure.config.StockCollectionProperties;
 import me.rgunny.event.infrastructure.repository.WatchTargetRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

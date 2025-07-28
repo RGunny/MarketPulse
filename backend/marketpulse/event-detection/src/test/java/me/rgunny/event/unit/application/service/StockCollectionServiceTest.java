@@ -7,7 +7,7 @@ import me.rgunny.event.domain.stock.StockPrice;
 import me.rgunny.event.domain.stock.WatchCategory;
 import me.rgunny.event.domain.stock.WatchTarget;
 import me.rgunny.event.fixture.StockPriceTestFixture;
-import me.rgunny.event.infrastructure.config.StockCollectionProperties;
+import me.rgunny.event.marketdata.infrastructure.config.StockCollectionProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
