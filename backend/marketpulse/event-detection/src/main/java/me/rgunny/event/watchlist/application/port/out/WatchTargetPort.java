@@ -16,6 +16,12 @@ public interface WatchTargetPort {
     Flux<WatchTarget> findActiveTargets();
     
     /**
+     * 고우선순위 감시 대상 조회 (우선순위 1-3)
+     * @return 고우선순위 감시 대상 목록
+     */
+    Flux<WatchTarget> findHighPriorityTargets();
+    
+    /**
      * 우선순위 범위로 감시 대상 조회
      * @param minPriority 최소 우선순위
      * @param maxPriority 최대 우선순위
@@ -29,6 +35,13 @@ public interface WatchTargetPort {
      * @return 해당 카테고리의 감시 대상 목록
      */
     Flux<WatchTarget> findByCategory(String category);
+    
+    /**
+     * 활성화된 카테고리별 감시 대상 조회
+     * @param category 카테고리
+     * @return 해당 카테고리의 활성 감시 대상 목록
+     */
+    Flux<WatchTarget> findActiveTargetsByCategory(me.rgunny.event.watchlist.domain.model.WatchCategory category);
     
     /**
      * 종목 코드로 감시 대상 조회

@@ -1,8 +1,8 @@
 package me.rgunny.event.unit.infrastructure.adapter.output;
 
-import me.rgunny.event.marketdata.application.port.out.KISCredentialPort;
-import me.rgunny.event.marketdata.infrastructure.adapter.out.credential.KISCredentialResolverImpl;
-import me.rgunny.event.marketdata.infrastructure.config.KISApiProperties;
+import me.rgunny.event.marketdata.application.port.out.kis.KISCredentialPort;
+import me.rgunny.event.marketdata.infrastructure.adapter.out.kis.KISCredentialResolverImpl;
+import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
 import me.rgunny.marketpulse.common.security.CryptoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

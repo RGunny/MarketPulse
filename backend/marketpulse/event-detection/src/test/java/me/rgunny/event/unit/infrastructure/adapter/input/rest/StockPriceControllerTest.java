@@ -1,9 +1,9 @@
 package me.rgunny.event.unit.infrastructure.adapter.input.rest;
 
-import me.rgunny.event.shared.application.error.StockPriceErrorCode;
-import me.rgunny.event.application.port.input.GetStockPriceUseCase;
-import me.rgunny.event.domain.stock.StockPrice;
-import me.rgunny.event.infrastructure.adapter.input.rest.StockPriceController;
+import me.rgunny.event.marketdata.domain.error.StockPriceErrorCode;
+import me.rgunny.event.marketdata.application.port.in.GetStockPriceUseCase;
+import me.rgunny.event.marketdata.domain.model.StockPrice;
+import me.rgunny.event.marketdata.infrastructure.adapter.in.rest.StockPriceController;
 import me.rgunny.marketpulse.common.response.Result;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

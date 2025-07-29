@@ -1,8 +1,8 @@
 package me.rgunny.event.medium.infrastructure.repository;
 
-import me.rgunny.event.domain.stock.WatchCategory;
-import me.rgunny.event.domain.stock.WatchTarget;
-import me.rgunny.event.infrastructure.repository.WatchTargetRepository;
+import me.rgunny.event.watchlist.domain.model.WatchCategory;
+import me.rgunny.event.watchlist.domain.model.WatchTarget;
+import me.rgunny.event.watchlist.infrastructure.adapter.out.persistence.WatchTargetRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

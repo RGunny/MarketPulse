@@ -1,13 +1,13 @@
 package me.rgunny.event.unit.application.service;
 
-import me.rgunny.event.application.port.input.GetStockPriceUseCase;
-import me.rgunny.event.application.port.output.WatchTargetPort;
-import me.rgunny.event.application.service.StockCollectionService;
-import me.rgunny.event.domain.stock.StockPrice;
-import me.rgunny.event.domain.stock.WatchCategory;
-import me.rgunny.event.domain.stock.WatchTarget;
+import me.rgunny.event.marketdata.application.port.in.GetStockPriceUseCase;
+import me.rgunny.event.watchlist.application.port.out.WatchTargetPort;
+import me.rgunny.event.marketdata.infrastructure.adapter.in.scheduler.StockPriceCollectionScheduler;
+import me.rgunny.event.marketdata.domain.model.StockPrice;
+import me.rgunny.event.watchlist.domain.model.WatchCategory;
+import me.rgunny.event.watchlist.domain.model.WatchTarget;
 import me.rgunny.event.fixture.StockPriceTestFixture;
-import me.rgunny.event.marketdata.infrastructure.config.StockCollectionProperties;
+import me.rgunny.event.marketdata.infrastructure.config.shared.StockCollectionProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,23 +29,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("StockCollectionService 단위 테스트")
-class StockCollectionServiceTest {
+@DisplayName("StockPriceCollectionScheduler 단위 테스트")
+class StockPriceCollectionSchedulerTest {
     
     @Mock
     private WatchTargetPort watchTargetPort;
     
     @Mock
-    private GetStockPriceUseCase stockPriceUseCase;
+    private me.rgunny.event.marketdata.application.port.in.CollectStockPriceUseCase stockPriceUseCase;
     
     @Mock 
     private StockCollectionProperties properties;
     
-    private StockCollectionService stockCollectionService;
+    private StockPriceCollectionScheduler stockCollectionService;
     
     @BeforeEach
     void setUp() {
-        stockCollectionService = new StockCollectionService(watchTargetPort, stockPriceUseCase, properties);
+        stockCollectionService = new StockPriceCollectionScheduler(watchTargetPort, stockPriceUseCase, properties);
     }
     
     @Nested
@@ -67,7 +67,7 @@ class StockCollectionServiceTest {
             given(stockPriceUseCase.getCurrentPriceAndSave(anyString())).willReturn(Mono.just(stockPrice));
             
             // when & then
-            StepVerifier.create(stockCollectionService.collectActiveStockPrices())
+            StepVerifier.create(stockCollectionService.collectActiveStocksReactive())
                     .verifyComplete();
             
             verify(watchTargetPort).findActiveTargets();
@@ -88,10 +88,10 @@ class StockCollectionServiceTest {
             given(watchTargetPort.findActiveTargets()).willReturn(Flux.just(recentTarget));
             given(stockPriceUseCase.getCurrentPriceAndSave("005930")).willReturn(Mono.just(StockPriceTestFixture.samsung()));
             
-            StepVerifier.create(stockCollectionService.collectActiveStockPrices()).verifyComplete();
+            StepVerifier.create(stockCollectionService.collectActiveStocksReactive()).verifyComplete();
             
             // when - 즉시 다시 수집 시도 (30초가 지나지 않음)
-            StepVerifier.create(stockCollectionService.collectActiveStockPrices())
+            StepVerifier.create(stockCollectionService.collectActiveStocksReactive())
                     .verifyComplete();
             
             // then - 두 번째 호출에서는 수집하지 않음 (이미 최근에 수집됨)
@@ -115,7 +115,7 @@ class StockCollectionServiceTest {
                     .willReturn(Mono.just(StockPriceTestFixture.kakao()));
             
             // when & then
-            StepVerifier.create(stockCollectionService.collectActiveStockPrices())
+            StepVerifier.create(stockCollectionService.collectActiveStocksReactive())
                     .verifyComplete();
             
             verify(stockPriceUseCase).getCurrentPriceAndSave("005930");
@@ -132,7 +132,7 @@ class StockCollectionServiceTest {
             given(watchTargetPort.findActiveTargets()).willReturn(Flux.empty());
             
             // when & then
-            StepVerifier.create(stockCollectionService.collectActiveStockPrices())
+            StepVerifier.create(stockCollectionService.collectActiveStocksReactive())
                     .verifyComplete();
             
             verify(watchTargetPort).findActiveTargets();
@@ -159,7 +159,7 @@ class StockCollectionServiceTest {
                     .willReturn(Mono.just(StockPriceTestFixture.samsung()));
             
             // when & then
-            StepVerifier.create(stockCollectionService.collectHighPriorityStocks())
+            StepVerifier.create(stockCollectionService.collectHighPriorityStocksReactive())
                     .verifyComplete();
             
             verify(watchTargetPort).findHighPriorityTargets();
@@ -223,10 +223,10 @@ class StockCollectionServiceTest {
             given(stockPriceUseCase.getCurrentPriceAndSave("005930"))
                     .willReturn(Mono.just(StockPriceTestFixture.samsung()));
             
-            StepVerifier.create(stockCollectionService.collectActiveStockPrices()).verifyComplete();
+            StepVerifier.create(stockCollectionService.collectActiveStocksReactive()).verifyComplete();
             
             // when & then
-            StepVerifier.create(stockCollectionService.getCollectionStats())
+            StepVerifier.create(stockCollectionService.getCurrentStatus())
                     .expectNextMatches(stats -> 
                             stats.totalTrackedSymbols() == 1 && stats.recentCollections() == 1)
                     .verifyComplete();

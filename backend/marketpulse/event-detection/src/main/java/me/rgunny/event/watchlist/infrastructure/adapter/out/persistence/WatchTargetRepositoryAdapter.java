@@ -31,6 +31,13 @@ public class WatchTargetRepositoryAdapter implements WatchTargetPort {
     }
     
     @Override
+    public Flux<WatchTarget> findHighPriorityTargets() {
+        log.debug("고우선순위 감시 대상 조회 시작");
+        return findByPriorityRange(properties.priority().highMin(), properties.priority().highMax())
+                .doOnNext(target -> log.debug("고우선순위 감시 대상: {} (우선순위: {})", target.getName(), target.getPriority()));
+    }
+    
+    @Override
     public Flux<WatchTarget> findByPriorityRange(int minPriority, int maxPriority) {
         log.debug("우선순위 범위 감시 대상 조회 시작 (우선순위 {}-{})", minPriority, maxPriority);
         return watchTargetRepository.findByPriorityBetweenAndActiveTrueOrderByPriorityAsc(minPriority, maxPriority)
@@ -45,6 +52,14 @@ public class WatchTargetRepositoryAdapter implements WatchTargetPort {
         return watchTargetRepository.findByCategoryAndActiveTrueOrderByPriorityAsc(watchCategory)
                 .doOnNext(target -> log.debug("카테고리 {} 감시 대상: {}", category, target.getName()))
                 .doOnComplete(() -> log.debug("카테고리 {} 감시 대상 조회 완료", category));
+    }
+    
+    @Override
+    public Flux<WatchTarget> findActiveTargetsByCategory(WatchCategory category) {
+        log.debug("활성화된 카테고리별 감시 대상 조회: {}", category);
+        return watchTargetRepository.findByCategoryAndActiveTrueOrderByPriorityAsc(category)
+                .doOnNext(target -> log.debug("카테고리 {} 활성 감시 대상: {}", category, target.getName()))
+                .doOnComplete(() -> log.debug("카테고리 {} 활성 감시 대상 조회 완료", category));
     }
     
     @Override

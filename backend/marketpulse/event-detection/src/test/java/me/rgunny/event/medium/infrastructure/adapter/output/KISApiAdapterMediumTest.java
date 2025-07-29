@@ -1,9 +1,9 @@
 package me.rgunny.event.medium.infrastructure.adapter.output;
 
-import me.rgunny.event.marketdata.application.port.out.KISCredentialPort;
-import me.rgunny.event.marketdata.application.port.out.KISTokenCachePort;
-import me.rgunny.event.marketdata.infrastructure.adapter.out.external.KISApiAdapter;
-import me.rgunny.event.marketdata.infrastructure.config.KISApiProperties;
+import me.rgunny.event.marketdata.application.port.out.kis.KISCredentialPort;
+import me.rgunny.event.marketdata.application.port.out.kis.KISTokenCachePort;
+import me.rgunny.event.marketdata.infrastructure.adapter.out.kis.KISApiAdapter;
+import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;

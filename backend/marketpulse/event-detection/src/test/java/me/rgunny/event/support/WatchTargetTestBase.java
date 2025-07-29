@@ -1,8 +1,8 @@
 package me.rgunny.event.support;
 
-import me.rgunny.event.domain.constants.BusinessConstants;
-import me.rgunny.event.domain.stock.WatchCategory;
-import me.rgunny.event.domain.stock.WatchTarget;
+import me.rgunny.event.shared.domain.value.BusinessConstants;
+import me.rgunny.event.watchlist.domain.model.WatchCategory;
+import me.rgunny.event.watchlist.domain.model.WatchTarget;
 
 import java.time.LocalDateTime;
 

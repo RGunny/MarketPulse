@@ -1,6 +1,6 @@
 package me.rgunny.event.unit.infrastructure.adapter.output;
 
-import me.rgunny.event.infrastructure.adapter.output.RedisKISTokenCacheAdapter;
+import me.rgunny.event.marketdata.infrastructure.adapter.out.kis.RedisKISTokenCacheAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

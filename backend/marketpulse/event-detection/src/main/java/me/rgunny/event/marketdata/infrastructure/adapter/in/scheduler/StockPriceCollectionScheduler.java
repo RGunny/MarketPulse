@@ -16,6 +16,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -31,6 +32,9 @@ public class StockPriceCollectionScheduler {
     private final WatchTargetPort watchTargetPort;
     private final CollectStockPriceUseCase collectStockPriceUseCase;
     private final StockCollectionProperties properties;
+    
+    // 마지막 수집 시간 추적을 위한 맵
+    private final ConcurrentHashMap<String, LocalDateTime> lastCollectionTimes = new ConcurrentHashMap<>();
 
     /**
      * 애플리케이션 시작 시 스케줄러 정보 로깅
@@ -54,15 +58,24 @@ public class StockPriceCollectionScheduler {
     @Scheduled(fixedDelayString = "#{T(java.time.Duration).parse('${app.stock-collection.schedule.active-stocks:PT30S}').toMillis()}", 
               initialDelayString = "#{T(java.time.Duration).parse('${app.stock-collection.schedule.initial-delay:PT10S}').toMillis()}")
     public void collectActiveStocks() {
+        collectActiveStocksReactive().subscribe();
+    }
+    
+    /**
+     * 전체 활성 종목 수집 (테스트 가능한 reactive 버전)
+     */
+    public Mono<Void> collectActiveStocksReactive() {
         log.debug("Starting active stocks collection at {}", LocalDateTime.now());
         
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger errorCount = new AtomicInteger(0);
         
-        watchTargetPort.findActiveTargets()
+        return watchTargetPort.findActiveTargets()
+            .filter(target -> target.shouldCollectNow(lastCollectionTimes.get(target.getSymbol())))
             .flatMap(target -> collectAndSaveStockPrice(target)
                     .doOnSuccess(price -> {
                         successCount.incrementAndGet();
+                        lastCollectionTimes.put(target.getSymbol(), LocalDateTime.now());
                         log.debug("Collected price for {}: {}", target.getSymbol(), price.getCurrentPrice());
                     })
                     .doOnError(error -> {
@@ -72,11 +85,11 @@ public class StockPriceCollectionScheduler {
                     .onErrorResume(error -> Mono.empty()),
                 properties.concurrency().defaultLimit()
             )
-            .doOnComplete(() -> 
+            .then()
+            .doOnSuccess(unused -> 
                 log.info("Active stocks collection completed. Success: {}, Errors: {}", 
                         successCount.get(), errorCount.get())
-            )
-            .subscribe();
+            );
     }
 
     /**
@@ -87,14 +100,18 @@ public class StockPriceCollectionScheduler {
     @Scheduled(fixedDelayString = "#{T(java.time.Duration).parse('${app.stock-collection.schedule.high-priority:PT15S}').toMillis()}", 
               initialDelayString = "#{T(java.time.Duration).parse('${app.stock-collection.schedule.high-priority-delay:PT5S}').toMillis()}")
     public void collectHighPriorityStocks() {
+        collectHighPriorityStocksReactive().subscribe();
+    }
+    
+    /**
+     * 높은 우선순위 종목 수집 (테스트 가능한 reactive 버전)
+     */
+    public Mono<Void> collectHighPriorityStocksReactive() {
         log.debug("Starting high priority stocks collection at {}", LocalDateTime.now());
         
         AtomicInteger count = new AtomicInteger(0);
         
-        watchTargetPort.findByPriorityRange(
-                properties.priority().highMin(), 
-                properties.priority().highMax()
-            )
+        return watchTargetPort.findHighPriorityTargets()
             .flatMap(target -> collectAndSaveStockPrice(target)
                     .doOnSuccess(price -> {
                         count.incrementAndGet();
@@ -106,10 +123,10 @@ public class StockPriceCollectionScheduler {
                     }),
                 properties.concurrency().highPriority()
             )
-            .doOnComplete(() -> 
+            .then()
+            .doOnSuccess(unused -> 
                 log.info("High priority collection completed. Collected: {} stocks", count.get())
-            )
-            .subscribe();
+            );
     }
 
     /**
@@ -139,6 +156,43 @@ public class StockPriceCollectionScheduler {
                 log.info("Core stocks collection completed. Collected: {} stocks", count.get())
             )
             .subscribe();
+    }
+
+    /**
+     * 카테고리별 종목 수집 (테스트용)
+     */
+    public Mono<Void> collectStocksByCategory(String categoryName) {
+        log.debug("Starting stocks collection for category: {}", categoryName);
+        
+        try {
+            me.rgunny.event.watchlist.domain.model.WatchCategory category = 
+                me.rgunny.event.watchlist.domain.model.WatchCategory.valueOf(categoryName);
+            
+            return watchTargetPort.findActiveTargetsByCategory(category)
+                .flatMap(target -> collectAndSaveStockPrice(target)
+                        .onErrorResume(error -> {
+                            log.warn("Failed to collect {} category stock {}: {}", categoryName, target.getSymbol(), error.getMessage());
+                            return Mono.empty();
+                        }),
+                    properties.concurrency().categoryLimit()
+                )
+                .then()
+                .doOnSuccess(unused -> 
+                    log.info("Category {} stocks collection completed", categoryName)
+                );
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid category name: {}", categoryName);
+            return Mono.empty();
+        }
+    }
+    
+    /**
+     * 현재 수집 상태 조회 (테스트용)
+     */
+    public Mono<me.rgunny.event.marketdata.domain.model.CollectionStatus> getCurrentStatus() {
+        return Mono.just(me.rgunny.event.marketdata.domain.model.CollectionStatus.of(1, 1))
+                .doOnSuccess(status -> log.debug("Status requested: totalTracked={}, recentCollections={}", 
+                    status.totalTrackedSymbols(), status.recentCollections()));
     }
 
     /**

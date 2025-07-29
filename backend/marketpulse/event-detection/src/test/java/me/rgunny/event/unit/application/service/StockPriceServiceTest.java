@@ -1,10 +1,11 @@
 package me.rgunny.event.unit.application.service;
 
-import me.rgunny.event.application.port.output.KISApiPort;
-import me.rgunny.event.application.port.output.StockPriceCachePort;
-import me.rgunny.event.application.service.StockPriceService;
-import me.rgunny.event.domain.stock.StockPrice;
-import me.rgunny.event.infrastructure.repository.StockPriceRepository;
+import me.rgunny.event.marketdata.application.port.out.ExternalApiPort;
+import me.rgunny.event.marketdata.application.port.out.shared.MarketDataCachePort;
+import me.rgunny.event.marketdata.application.usecase.GetStockPriceService;
+import me.rgunny.event.marketdata.domain.model.StockPrice;
+import me.rgunny.event.marketdata.application.port.out.shared.MarketDataRepositoryPort;
+import me.rgunny.event.shared.domain.value.MarketDataType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,29 +26,29 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("StockPriceService 단위 테스트")
+@DisplayName("GetStockPriceService 단위 테스트")
 class StockPriceServiceTest {
     
     @Mock
-    private KISApiPort kisApiPort;
+    private ExternalApiPort externalApiPort;
     
     @Mock
-    private StockPriceCachePort stockPriceCachePort;
+    private MarketDataCachePort marketDataCachePort;
     
     @Mock
-    private StockPriceRepository stockPriceRepository;
+    private MarketDataRepositoryPort marketDataRepositoryPort;
     
-    private StockPriceService stockPriceService;
+    private GetStockPriceService getStockPriceService;
     
     @BeforeEach
     void setUp() {
-        stockPriceService = new StockPriceService(kisApiPort, stockPriceCachePort, stockPriceRepository);
+        getStockPriceService = new GetStockPriceService(externalApiPort, marketDataCachePort, marketDataRepositoryPort);
         
         // 서비스와 의존성 null 체크
-        assertThat(kisApiPort).isNotNull();
-        assertThat(stockPriceCachePort).isNotNull();
-        assertThat(stockPriceRepository).isNotNull();
-        assertThat(stockPriceService).isNotNull();
+        assertThat(externalApiPort).isNotNull();
+        assertThat(marketDataCachePort).isNotNull();
+        assertThat(marketDataRepositoryPort).isNotNull();
+        assertThat(getStockPriceService).isNotNull();
     }
     
     @Test
@@ -57,19 +58,19 @@ class StockPriceServiceTest {
         String symbol = "005930";
         StockPrice cachedPrice = createSampleStockPrice(symbol);
         
-        given(stockPriceCachePort.getStockPrice(symbol))
+        given(marketDataCachePort.getStockPrice(symbol))
                 .willReturn(Mono.just(cachedPrice));
         
         // API 호출을 안전하게 처리 (평가될 수 있으므로)
-        given(kisApiPort.getCurrentPrice(symbol))
+        given(externalApiPort.fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class))
                 .willReturn(Mono.empty()); // 빈 결과 반환
         
         // when & then
-        StepVerifier.create(stockPriceService.getCurrentPrice(symbol))
+        StepVerifier.create(getStockPriceService.getCurrentPrice(symbol))
                 .expectNext(cachedPrice)
                 .verifyComplete();
         
-        verify(stockPriceCachePort).getStockPrice(symbol);
+        verify(marketDataCachePort).getStockPrice(symbol);
         // API 호출 여부는 검증하지 않음 (Reactor 동작에 따라 달라질 수 있음)
     }
     
@@ -80,23 +81,23 @@ class StockPriceServiceTest {
         String symbol = "005930";
         StockPrice apiPrice = createSampleStockPrice(symbol);
         
-        given(stockPriceCachePort.getStockPrice(symbol))
+        given(marketDataCachePort.getStockPrice(symbol))
                 .willReturn(Mono.empty());
-        given(kisApiPort.getCurrentPrice(symbol))
+        given(externalApiPort.fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class))
                 .willReturn(Mono.just(apiPrice));
-        given(stockPriceCachePort.saveStockPrice(eq(apiPrice), any(Duration.class)))
+        given(marketDataCachePort.saveStockPrice(eq(apiPrice), any(Duration.class)))
                 .willReturn(Mono.empty());
         
         // when
-        Mono<StockPrice> result = stockPriceService.getCurrentPrice(symbol);
+        Mono<StockPrice> result = getStockPriceService.getCurrentPrice(symbol);
         
         // then
         StepVerifier.create(result)
                 .expectNext(apiPrice)
                 .verifyComplete();
         
-        verify(kisApiPort).getCurrentPrice(symbol);
-        verify(stockPriceCachePort).saveStockPrice(eq(apiPrice), any(Duration.class));
+        verify(externalApiPort).fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class);
+        verify(marketDataCachePort).saveStockPrice(eq(apiPrice), any(Duration.class));
     }
     
     @Test
@@ -106,24 +107,24 @@ class StockPriceServiceTest {
         String symbol = "005930";
         StockPrice newPrice = createSampleStockPrice(symbol);
         
-        given(stockPriceCachePort.deleteStockPrice(symbol))
+        given(marketDataCachePort.deleteStockPrice(symbol))
                 .willReturn(Mono.empty());
-        given(kisApiPort.getCurrentPrice(symbol))
+        given(externalApiPort.fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class))
                 .willReturn(Mono.just(newPrice));
-        given(stockPriceCachePort.saveStockPrice(eq(newPrice), any(Duration.class)))
+        given(marketDataCachePort.saveStockPrice(eq(newPrice), any(Duration.class)))
                 .willReturn(Mono.empty());
         
         // when
-        Mono<StockPrice> result = stockPriceService.refreshCurrentPrice(symbol);
+        Mono<StockPrice> result = getStockPriceService.refreshCurrentPrice(symbol);
         
         // then
         StepVerifier.create(result)
                 .expectNext(newPrice)
                 .verifyComplete();
         
-        verify(stockPriceCachePort).deleteStockPrice(symbol);
-        verify(kisApiPort).getCurrentPrice(symbol);
-        verify(stockPriceCachePort).saveStockPrice(eq(newPrice), any(Duration.class));
+        verify(marketDataCachePort).deleteStockPrice(symbol);
+        verify(externalApiPort).fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class);
+        verify(marketDataCachePort).saveStockPrice(eq(newPrice), any(Duration.class));
     }
     
     @Test
@@ -134,24 +135,24 @@ class StockPriceServiceTest {
         StockPrice stockPrice = createSampleStockPrice(symbol);
         StockPrice savedPrice = createSampleStockPrice(symbol); // ID가 설정된 버전
         
-        given(stockPriceCachePort.getStockPrice(symbol))
+        given(marketDataCachePort.getStockPrice(symbol))
                 .willReturn(Mono.just(stockPrice));
-        given(stockPriceRepository.save(stockPrice))
+        given(marketDataRepositoryPort.save(stockPrice))
                 .willReturn(Mono.just(savedPrice));
         
         // API 호출을 안전하게 처리
-        given(kisApiPort.getCurrentPrice(symbol))
+        given(externalApiPort.fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class))
                 .willReturn(Mono.empty());
         
         // when
-        Mono<StockPrice> result = stockPriceService.getCurrentPriceAndSave(symbol);
+        Mono<StockPrice> result = getStockPriceService.getCurrentPriceAndSave(symbol);
         
         // then
         StepVerifier.create(result)
                 .expectNext(savedPrice)
                 .verifyComplete();
         
-        verify(stockPriceRepository).save(stockPrice);
+        verify(marketDataRepositoryPort).save(stockPrice);
     }
     
     @Test
@@ -161,20 +162,20 @@ class StockPriceServiceTest {
         String symbol = "005930";
         RuntimeException apiError = new RuntimeException("KIS API 호출 실패");
         
-        given(stockPriceCachePort.getStockPrice(symbol))
+        given(marketDataCachePort.getStockPrice(symbol))
                 .willReturn(Mono.empty());
-        given(kisApiPort.getCurrentPrice(symbol))
+        given(externalApiPort.fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class))
                 .willReturn(Mono.error(apiError));
         
         // when
-        Mono<StockPrice> result = stockPriceService.getCurrentPrice(symbol);
+        Mono<StockPrice> result = getStockPriceService.getCurrentPrice(symbol);
         
         // then
         StepVerifier.create(result)
                 .expectError(RuntimeException.class)
                 .verify();
         
-        verify(stockPriceCachePort, never()).saveStockPrice(any(), any());
+        verify(marketDataCachePort, never()).saveStockPrice(any(), any());
     }
     
     @Test
@@ -185,15 +186,15 @@ class StockPriceServiceTest {
         StockPrice apiPrice = createSampleStockPrice(symbol);
         RuntimeException cacheError = new RuntimeException("캐시 저장 실패");
         
-        given(stockPriceCachePort.getStockPrice(symbol))
+        given(marketDataCachePort.getStockPrice(symbol))
                 .willReturn(Mono.empty());
-        given(kisApiPort.getCurrentPrice(symbol))
+        given(externalApiPort.fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class))
                 .willReturn(Mono.just(apiPrice));
-        given(stockPriceCachePort.saveStockPrice(eq(apiPrice), any(Duration.class)))
+        given(marketDataCachePort.saveStockPrice(eq(apiPrice), any(Duration.class)))
                 .willReturn(Mono.error(cacheError));
         
         // when
-        Mono<StockPrice> result = stockPriceService.getCurrentPrice(symbol);
+        Mono<StockPrice> result = getStockPriceService.getCurrentPrice(symbol);
         
         // then
         StepVerifier.create(result)

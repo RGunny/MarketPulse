@@ -1,6 +1,7 @@
 package me.rgunny.event.marketdata.application.usecase;
 
 import me.rgunny.event.marketdata.application.port.in.GetStockPriceUseCase;
+import me.rgunny.event.marketdata.application.port.in.CollectStockPriceUseCase;
 import me.rgunny.event.marketdata.application.port.out.ExternalApiPort;
 import me.rgunny.event.marketdata.application.port.out.shared.MarketDataCachePort;
 import me.rgunny.event.marketdata.application.port.out.shared.MarketDataRepositoryPort;
@@ -12,7 +13,7 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 
 @Service
-public class GetStockPriceService implements GetStockPriceUseCase {
+public class GetStockPriceService implements GetStockPriceUseCase, CollectStockPriceUseCase {
     
     private static final Duration CACHE_TTL = Duration.ofMinutes(1);
     
@@ -45,6 +46,7 @@ public class GetStockPriceService implements GetStockPriceUseCase {
         return getCurrentPrice(symbol)
                 .flatMap(marketDataRepositoryPort::save);
     }
+    
     
     private Mono<StockPrice> getFromApiAndCache(String symbol) {
         return externalApiPort.fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class)
