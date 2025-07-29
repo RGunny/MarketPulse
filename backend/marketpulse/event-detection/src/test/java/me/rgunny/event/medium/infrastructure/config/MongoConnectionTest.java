@@ -1,7 +1,7 @@
 package me.rgunny.event.medium.infrastructure.config;
 
-import me.rgunny.event.domain.stock.StockPrice;
-import me.rgunny.event.infrastructure.repository.StockPriceRepository;
+import me.rgunny.event.marketdata.domain.model.StockPrice;
+import me.rgunny.event.marketdata.infrastructure.adapter.out.shared.StockPriceRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +84,7 @@ class MongoConnectionTest {
 
         // when
         Mono<StockPrice> savedAndFound = stockPriceRepository.save(stockPrice)
-                .flatMap(saved -> stockPriceRepository.findById(saved.getId()));
+                .flatMap(saved -> stockPriceRepository.findFirstBySymbolOrderByTimestampDesc(saved.getSymbol()));
 
         // then
         StepVerifier.create(savedAndFound)

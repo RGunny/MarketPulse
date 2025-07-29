@@ -1,7 +1,7 @@
 package me.rgunny.event.unit.domain.stock;
 
-import me.rgunny.event.domain.stock.WatchCategory;
-import me.rgunny.event.domain.stock.WatchTarget;
+import me.rgunny.event.watchlist.domain.model.WatchCategory;
+import me.rgunny.event.watchlist.domain.model.WatchTarget;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

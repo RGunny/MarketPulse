@@ -1,7 +1,7 @@
 package me.rgunny.event.fixture;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.rgunny.event.domain.stock.StockPrice;
+import me.rgunny.event.marketdata.domain.model.StockPrice;
 
 import java.math.BigDecimal;
 

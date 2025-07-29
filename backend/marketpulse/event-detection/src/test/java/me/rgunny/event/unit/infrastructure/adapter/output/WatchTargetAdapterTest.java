@@ -1,10 +1,10 @@
 package me.rgunny.event.unit.infrastructure.adapter.output;
 
-import me.rgunny.event.domain.stock.WatchCategory;
-import me.rgunny.event.domain.stock.WatchTarget;
-import me.rgunny.event.infrastructure.adapter.output.WatchTargetAdapter;
-import me.rgunny.event.infrastructure.config.StockCollectionProperties;
-import me.rgunny.event.infrastructure.repository.WatchTargetRepository;
+import me.rgunny.event.watchlist.domain.model.WatchCategory;
+import me.rgunny.event.watchlist.domain.model.WatchTarget;
+import me.rgunny.event.watchlist.infrastructure.adapter.out.persistence.WatchTargetRepositoryAdapter;
+import me.rgunny.event.watchlist.infrastructure.config.WatchlistProperties;
+import me.rgunny.event.watchlist.infrastructure.adapter.out.persistence.WatchTargetRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -29,13 +29,13 @@ class WatchTargetAdapterTest {
     private WatchTargetRepository watchTargetRepository;
     
     @Mock
-    private StockCollectionProperties properties;
+    private WatchlistProperties properties;
     
-    private WatchTargetAdapter watchTargetAdapter;
+    private WatchTargetRepositoryAdapter watchTargetAdapter;
     
     @BeforeEach
     void setUp() {
-        watchTargetAdapter = new WatchTargetAdapter(watchTargetRepository, properties);
+        watchTargetAdapter = new WatchTargetRepositoryAdapter(watchTargetRepository, properties);
     }
     
     @Nested
@@ -82,8 +82,8 @@ class WatchTargetAdapterTest {
         @DisplayName("설정된 우선순위 범위의 감시 대상을 조회한다")
         void whenFindHighPriorityTargets_thenReturnsHighPriorityTargets() {
             // given
-            StockCollectionProperties.Priority priority = new StockCollectionProperties.Priority(1, 3, "CORE");
-            given(properties.priority()).willReturn(priority);
+            WatchlistProperties.Priority priorityConfig = new WatchlistProperties.Priority(1, 3);
+            given(properties.priority()).willReturn(priorityConfig);
             
             WatchTarget target1 = createWatchTargetWithPriority("005930", "삼성전자", 1);
             WatchTarget target2 = createWatchTargetWithPriority("035720", "카카오", 2);
@@ -106,8 +106,8 @@ class WatchTargetAdapterTest {
         @DisplayName("높은 우선순위 감시 대상이 없으면 빈 결과를 반환한다")
         void whenNoHighPriorityTargets_thenReturnsEmpty() {
             // given
-            StockCollectionProperties.Priority priority = new StockCollectionProperties.Priority(1, 3, "CORE");
-            given(properties.priority()).willReturn(priority);
+            WatchlistProperties.Priority priorityConfig = new WatchlistProperties.Priority(1, 3);
+            given(properties.priority()).willReturn(priorityConfig);
             
             given(watchTargetRepository.findByPriorityBetweenAndActiveTrueOrderByPriorityAsc(1, 3))
                     .willReturn(Flux.empty());
@@ -123,11 +123,10 @@ class WatchTargetAdapterTest {
         @DisplayName("Properties 설정값을 사용하여 우선순위 범위를 동적으로 조회한다")
         void givenDifferentPriorityRange_whenFindHighPriorityTargets_thenUsesConfiguredRange() {
             // given - 다른 우선순위 범위 설정
-            StockCollectionProperties.Priority priority = new StockCollectionProperties.Priority(2, 5, "CORE");
+            WatchlistProperties.Priority priorityConfig = new WatchlistProperties.Priority(2, 5);
+            given(properties.priority()).willReturn(priorityConfig);
             
-            given(properties.priority()).willReturn(priority);
-            
-            WatchTargetAdapter customAdapter = new WatchTargetAdapter(watchTargetRepository, properties);
+            WatchTargetRepositoryAdapter customAdapter = new WatchTargetRepositoryAdapter(watchTargetRepository, properties);
             
             WatchTarget target = createWatchTargetWithPriority("005930", "삼성전자", 3);
             given(watchTargetRepository.findByPriorityBetweenAndActiveTrueOrderByPriorityAsc(2, 5))

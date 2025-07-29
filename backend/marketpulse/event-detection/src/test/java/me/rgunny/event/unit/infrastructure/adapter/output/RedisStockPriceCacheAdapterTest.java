@@ -2,9 +2,9 @@ package me.rgunny.event.unit.infrastructure.adapter.output;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.rgunny.event.domain.stock.StockPrice;
+import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.fixture.StockPriceTestFixture;
-import me.rgunny.event.infrastructure.adapter.output.RedisStockPriceCacheAdapter;
+import me.rgunny.event.marketdata.infrastructure.adapter.out.shared.RedisMarketDataCacheAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,14 +39,14 @@ class RedisStockPriceCacheAdapterTest {
     @Mock
     private ObjectMapper objectMapper;
     
-    private RedisStockPriceCacheAdapter cacheAdapter;
+    private RedisMarketDataCacheAdapter cacheAdapter;
     
     private static final String SYMBOL = "005930";
     private static final String CACHE_KEY = "stock:price:" + SYMBOL;
     
     @BeforeEach
     void setUp() {
-        cacheAdapter = new RedisStockPriceCacheAdapter(redisTemplate, objectMapper);
+        cacheAdapter = new RedisMarketDataCacheAdapter(redisTemplate, objectMapper);
         lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
     

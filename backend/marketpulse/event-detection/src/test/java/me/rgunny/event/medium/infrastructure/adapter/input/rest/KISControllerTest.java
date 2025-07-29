@@ -1,8 +1,8 @@
 package me.rgunny.event.medium.infrastructure.adapter.input.rest;
 
-import me.rgunny.event.application.port.input.CheckKISConnectionUseCase;
-import me.rgunny.event.application.port.input.KISConnectionStatus;
-import me.rgunny.event.infrastructure.adapter.input.rest.KISController;
+import me.rgunny.event.marketdata.application.port.in.CheckKISConnectionUseCase;
+import me.rgunny.event.marketdata.application.port.in.KISConnectionStatus;
+import me.rgunny.event.marketdata.infrastructure.adapter.in.rest.KISController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +20,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 @WebFluxTest(KISController.class)
-@DisplayName("KISController - /api/kis/oauth (medium)")
-class KISControllerTest {
+@DisplayName("StockPriceController - /api/kis/oauth (medium)")
+class StockPriceControllerTest {
 
     @TestConfiguration
     static class TestConfig {

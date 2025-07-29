@@ -1,7 +1,7 @@
 package me.rgunny.event.unit.domain.stock;
 
-import me.rgunny.event.domain.market.MarketDataType;
-import me.rgunny.event.domain.stock.StockPrice;
+import me.rgunny.event.shared.domain.value.MarketDataType;
+import me.rgunny.event.marketdata.domain.model.StockPrice;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
