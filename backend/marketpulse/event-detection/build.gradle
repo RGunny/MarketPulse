@@ -1,15 +1,40 @@
+plugins {
+    id 'com.google.protobuf' version '0.9.4'
+}
+
 dependencies {
     // 공통모듈
     implementation project(':common')
 
     // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // gRPC Client
+    implementation "net.devh:grpc-client-spring-boot-starter:${rootProject.versions.grpcSpringBoot}"
+    implementation "io.grpc:grpc-protobuf:${rootProject.versions.grpc}"
+    implementation "io.grpc:grpc-stub:${rootProject.versions.grpc}"
+    implementation "javax.annotation:javax.annotation-api:${rootProject.versions.javaxAnnotation}"
 
-    // 테스트
+    // 테스트 - root에 있는 것 제외
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'org.testcontainers:junit-jupiter'
-    testImplementation 'org.testcontainers:testcontainers'
     testImplementation 'org.testcontainers:mongodb'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:4.12.0'
+    testImplementation "com.squareup.okhttp3:mockwebserver:${rootProject.versions.mockwebserver}"
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${rootProject.versions.protobuf}"
+    }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${rootProject.versions.grpc}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
 }
 

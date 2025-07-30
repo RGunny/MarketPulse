@@ -20,13 +20,16 @@ public class GetStockPriceService implements GetStockPriceUseCase, CollectStockP
     private final ExternalApiPort externalApiPort;
     private final MarketDataCachePort marketDataCachePort;
     private final MarketDataRepositoryPort marketDataRepositoryPort;
+    private final PriceAlertService priceAlertService;
     
     public GetStockPriceService(ExternalApiPort externalApiPort,
                                MarketDataCachePort marketDataCachePort,
-                               MarketDataRepositoryPort marketDataRepositoryPort) {
+                               MarketDataRepositoryPort marketDataRepositoryPort,
+                               PriceAlertService priceAlertService) {
         this.externalApiPort = externalApiPort;
         this.marketDataCachePort = marketDataCachePort;
         this.marketDataRepositoryPort = marketDataRepositoryPort;
+        this.priceAlertService = priceAlertService;
     }
     
     @Override
@@ -44,7 +47,13 @@ public class GetStockPriceService implements GetStockPriceUseCase, CollectStockP
     @Override
     public Mono<StockPrice> getCurrentPriceAndSave(String symbol) {
         return getCurrentPrice(symbol)
-                .flatMap(marketDataRepositoryPort::save);
+                .flatMap(stockPrice -> 
+                    marketDataRepositoryPort.save(stockPrice)
+                            .flatMap(savedStockPrice -> 
+                                priceAlertService.analyzeAndSendAlert(savedStockPrice)
+                                        .thenReturn(savedStockPrice)
+                            )
+                );
     }
     
     
