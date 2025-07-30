@@ -6,6 +6,7 @@ include 'common'
 // 비즈니스 도메인 모듈
 //include 'api'
 include 'event-detection'
+include 'notification'
 include 'llm'
 //include 'analytics'
 //include 'simulator'

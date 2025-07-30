@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package notification;
+
+option java_package = "me.rgunny.notification.grpc";
+option java_outer_classname = "NotificationServiceProto";
+
+// 알림 서비스 정의
+service NotificationService {
+    // 가격 알림 발송
+    rpc SendPriceAlert(PriceAlertRequest) returns (NotificationResponse);
+    
+    // 알림 상태 확인 (헬스 체크)
+    rpc GetNotificationStatus(Empty) returns (NotificationStatusResponse);
+}
+
+// 가격 알림 요청
+message PriceAlertRequest {
+    string event_id = 1;           // 이벤트 ID
+    string symbol = 2;             // 종목 코드 (예: "005930")
+    string symbol_name = 3;        // 종목명 (예: "삼성전자")
+    double current_price = 4;      // 현재가
+    double previous_price = 5;     // 이전가
+    double change_rate = 6;        // 변동률 (%)
+    string alert_type = 7;         // 알림 유형 (RISE, FALL, LIMIT_UP, LIMIT_DOWN)
+    int64 timestamp = 8;           // 타임스탬프 (epoch milliseconds)
+    map<string, string> metadata = 9; // 추가 메타데이터
+}
+
+// 알림 응답
+message NotificationResponse {
+    bool success = 1;              // 성공 여부
+    string message = 2;            // 응답 메시지
+    string notification_id = 3;    // 알림 ID
+    int64 processed_at = 4;        // 처리 시간
+}
+
+// 빈 메시지 (헬스 체크용)
+message Empty {
+}
+
+// 알림 상태 응답
+message NotificationStatusResponse {
+    string status = 1;             // 서비스 상태 (HEALTHY, DEGRADED, DOWN)
+    string version = 2;            // 서비스 버전
+    int32 active_notifications = 3; // 활성 알림 수
+    int64 uptime_seconds = 4;      // 가동 시간 (초)
+}

@@ -1,0 +1,38 @@
+# Notification Service Configuration
+server:
+  port: 8082
+
+spring:
+  application:
+    name: notification-service
+    version: 1.0.0
+
+# gRPC Configuration  
+grpc:
+  server:
+    port: 9082
+
+# Notification Configuration
+notification:
+  slack:
+    webhook-url: ${SLACK_WEBHOOK_URL:}
+  default:
+    recipient: "market-alerts"
+
+# Logging
+logging:
+  level:
+    me.rgunny.notification: DEBUG
+    io.grpc: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Management
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always

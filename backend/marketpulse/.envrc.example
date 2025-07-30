@@ -1,0 +1,6 @@
+# Slack
+export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR_WEBHOOK_HERE"
+
+# KIS API  
+export KIS_APP_KEY="your-app-key"
+export KIS_APP_SECRET="your-app-secret"
