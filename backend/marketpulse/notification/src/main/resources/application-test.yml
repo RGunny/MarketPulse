@@ -1,0 +1,38 @@
+# Test Profile Configuration
+server:
+  port: 8082
+
+spring:
+  application:
+    name: notification-service-test
+    version: 1.0.0
+
+# gRPC Configuration  
+grpc:
+  server:
+    port: 9082
+
+# Test용 Mock Slack 설정
+notification:
+  slack:
+    webhook-url: ${SLACK_WEBHOOK_URL:https://hooks.slack.com/services/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}
+  default:
+    recipient: "test-alerts"
+
+# Logging
+logging:
+  level:
+    me.rgunny.notification: DEBUG
+    io.grpc: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Management
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always

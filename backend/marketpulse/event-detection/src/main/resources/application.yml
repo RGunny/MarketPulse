@@ -65,7 +65,17 @@ market-data:
     base-url: https://ecos.bok.or.kr
     api-key: ${BOK_API_KEY}
 
-# 이벤트 감지 설정
+
+# MarketPulse 알림 설정
+marketpulse:
+  alert:
+    price:
+      rise-threshold: 5.0         # 급등 알림 임계값 (%)
+      fall-threshold: -5.0        # 급락 알림 임계값 (%)
+      limit-up-threshold: 29.5    # 상한가 알림 임계값 (%)
+      limit-down-threshold: -29.5 # 하한가 알림 임계값 (%)
+
+# 이벤트 감지 설정 (Legacy - 향후 제거 예정)
 event-detection:
   enabled: false
   thresholds:
@@ -74,6 +84,13 @@ event-detection:
     volume-surge-ratio: 2.0     # 평균 대비 200% 이상
   scheduler:
     interval: 30s               # 30초마다 감지
+
+# gRPC 클라이언트 설정
+grpc:
+  client:
+    notification:
+      address: 'static://localhost:9082'
+      negotiationType: plaintext
 
 # 로깅 설정
 logging:
