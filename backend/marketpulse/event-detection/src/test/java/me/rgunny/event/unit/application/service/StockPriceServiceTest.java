@@ -3,6 +3,7 @@ package me.rgunny.event.unit.application.service;
 import me.rgunny.event.marketdata.application.port.out.ExternalApiPort;
 import me.rgunny.event.marketdata.application.port.out.shared.MarketDataCachePort;
 import me.rgunny.event.marketdata.application.usecase.GetStockPriceService;
+import me.rgunny.event.marketdata.application.usecase.PriceAlertService;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.application.port.out.shared.MarketDataRepositoryPort;
 import me.rgunny.event.shared.domain.value.MarketDataType;
@@ -38,16 +39,20 @@ class StockPriceServiceTest {
     @Mock
     private MarketDataRepositoryPort marketDataRepositoryPort;
     
+    @Mock
+    private PriceAlertService priceAlertService;
+    
     private GetStockPriceService getStockPriceService;
     
     @BeforeEach
     void setUp() {
-        getStockPriceService = new GetStockPriceService(externalApiPort, marketDataCachePort, marketDataRepositoryPort);
+        getStockPriceService = new GetStockPriceService(externalApiPort, marketDataCachePort, marketDataRepositoryPort, priceAlertService);
         
         // 서비스와 의존성 null 체크
         assertThat(externalApiPort).isNotNull();
         assertThat(marketDataCachePort).isNotNull();
         assertThat(marketDataRepositoryPort).isNotNull();
+        assertThat(priceAlertService).isNotNull();
         assertThat(getStockPriceService).isNotNull();
     }
     
@@ -139,6 +144,8 @@ class StockPriceServiceTest {
                 .willReturn(Mono.just(stockPrice));
         given(marketDataRepositoryPort.save(stockPrice))
                 .willReturn(Mono.just(savedPrice));
+        given(priceAlertService.analyzeAndSendAlert(savedPrice))
+                .willReturn(Mono.empty());
         
         // API 호출을 안전하게 처리
         given(externalApiPort.fetchMarketData(symbol, MarketDataType.STOCK, StockPrice.class))
@@ -153,6 +160,7 @@ class StockPriceServiceTest {
                 .verifyComplete();
         
         verify(marketDataRepositoryPort).save(stockPrice);
+        verify(priceAlertService).analyzeAndSendAlert(savedPrice);
     }
     
     @Test

@@ -55,7 +55,7 @@ class NotificationGrpcServiceTest {
                 .setCurrentPrice(72000.0)
                 .setPreviousPrice(71500.0)
                 .setChangeRate(0.7)
-                .setAlertType("RISE")
+                .setAlertType(PriceAlertType.RISE)
                 .setTimestamp(Instant.now().toEpochMilli())
                 .putMetadata("threshold", "5%")
                 .build();
@@ -91,7 +91,7 @@ class NotificationGrpcServiceTest {
                 .setCurrentPrice(72000.0)
                 .setPreviousPrice(71500.0)
                 .setChangeRate(0.7)
-                .setAlertType("RISE")
+                .setAlertType(PriceAlertType.RISE)
                 .setTimestamp(Instant.now().toEpochMilli())
                 .build();
         
@@ -129,7 +129,7 @@ class NotificationGrpcServiceTest {
         verify(statusResponseObserver).onCompleted();
         
         NotificationStatusResponse response = responseCaptor.getValue();
-        assertThat(response.getStatus()).isEqualTo("HEALTHY");
+        assertThat(response.getStatus()).isEqualTo(NotificationStatus.HEALTHY);
         assertThat(response.getVersion()).isEqualTo("1.0.0");
         assertThat(response.getUptimeSeconds()).isGreaterThanOrEqualTo(0);
     }

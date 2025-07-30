@@ -6,6 +6,7 @@ import me.rgunny.notification.domain.event.PriceAlertEvent;
 import me.rgunny.notification.grpc.NotificationServiceGrpc;
 import me.rgunny.notification.grpc.NotificationServiceProto.Empty;
 import me.rgunny.notification.grpc.NotificationServiceProto.NotificationResponse;
+import me.rgunny.notification.grpc.NotificationServiceProto.NotificationStatus;
 import me.rgunny.notification.grpc.NotificationServiceProto.NotificationStatusResponse;
 import me.rgunny.notification.grpc.NotificationServiceProto.PriceAlertRequest;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -102,7 +103,7 @@ public class NotificationGrpcService extends NotificationServiceGrpc.Notificatio
         long uptimeSeconds = Instant.now().getEpochSecond() - startTime.getEpochSecond();
         
         NotificationStatusResponse response = NotificationStatusResponse.newBuilder()
-                .setStatus("HEALTHY")
+                .setStatus(NotificationStatus.HEALTHY)
                 .setVersion(serviceVersion)
                 .setActiveNotifications(0)
                 .setUptimeSeconds(uptimeSeconds)
@@ -128,7 +129,7 @@ public class NotificationGrpcService extends NotificationServiceGrpc.Notificatio
                 BigDecimal.valueOf(request.getPreviousPrice()),
                 BigDecimal.valueOf(request.getCurrentPrice()),
                 BigDecimal.valueOf(request.getChangeRate()),
-                request.getAlertType(),
+                request.getAlertType().name(),
                 timestamp,
                 Map.copyOf(request.getMetadataMap())
         );
