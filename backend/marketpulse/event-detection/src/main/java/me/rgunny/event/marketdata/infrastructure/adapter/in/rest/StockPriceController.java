@@ -27,7 +27,7 @@ public class StockPriceController {
     public Mono<Result<StockPrice>> getCurrentPrice(@PathVariable String symbol) {
         return getStockPriceUseCase.getCurrentPrice(symbol)
                 .map(Result::success)
-                .onErrorResume(error -> Mono.just(Result.failure(StockPriceErrorCode.STOCK_PRICE_ERROR)));
+                .onErrorResume(error -> Mono.just(Result.failure(StockPriceErrorCode.STOCK_PRICE_001)));
     }
     
     /**
@@ -39,7 +39,7 @@ public class StockPriceController {
     public Mono<Result<StockPrice>> refreshCurrentPrice(@PathVariable String symbol) {
         return getStockPriceUseCase.refreshCurrentPrice(symbol)
                 .map(Result::success)
-                .onErrorResume(error -> Mono.just(Result.failure(StockPriceErrorCode.STOCK_PRICE_REFRESH_ERROR)));
+                .onErrorResume(error -> Mono.just(Result.failure(StockPriceErrorCode.STOCK_PRICE_002)));
     }
     
     /**
@@ -51,6 +51,6 @@ public class StockPriceController {
     public Mono<Result<StockPrice>> getCurrentPriceAndSave(@PathVariable String symbol) {
         return getStockPriceUseCase.getCurrentPriceAndSave(symbol)
                 .map(Result::success)
-                .onErrorResume(error -> Mono.just(Result.failure(StockPriceErrorCode.STOCK_PRICE_SAVE_ERROR)));
+                .onErrorResume(error -> Mono.just(Result.failure(StockPriceErrorCode.STOCK_PRICE_003)));
     }
 }
