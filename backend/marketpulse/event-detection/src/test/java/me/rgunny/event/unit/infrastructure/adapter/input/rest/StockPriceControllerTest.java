@@ -73,8 +73,8 @@ class StockPriceControllerTest {
         StepVerifier.create(result)
                 .assertNext(response -> {
                     assertThat(response.isFailure()).isTrue();
-                    assertThat(response.code()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_ERROR.code());
-                    assertThat(response.message()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_ERROR.message());
+                    assertThat(response.code()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_001.code());
+                    assertThat(response.message()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_001.message());
                 })
                 .verifyComplete();
     }
@@ -116,8 +116,8 @@ class StockPriceControllerTest {
         StepVerifier.create(result)
                 .assertNext(response -> {
                     assertThat(response.isFailure()).isTrue();
-                    assertThat(response.code()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_REFRESH_ERROR.code());
-                    assertThat(response.message()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_REFRESH_ERROR.message());
+                    assertThat(response.code()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_002.code());
+                    assertThat(response.message()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_002.message());
                 })
                 .verifyComplete();
     }
@@ -159,8 +159,8 @@ class StockPriceControllerTest {
         StepVerifier.create(result)
                 .assertNext(response -> {
                     assertThat(response.isFailure()).isTrue();
-                    assertThat(response.code()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_SAVE_ERROR.code());
-                    assertThat(response.message()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_SAVE_ERROR.message());
+                    assertThat(response.code()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_003.code());
+                    assertThat(response.message()).isEqualTo(StockPriceErrorCode.STOCK_PRICE_003.message());
                 })
                 .verifyComplete();
     }

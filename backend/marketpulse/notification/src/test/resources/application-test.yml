@@ -1,0 +1,17 @@
+# Test Configuration
+spring:
+  application:
+    name: notification-service-test
+
+# Test Notification Configuration
+notification:
+  slack:
+    webhook-url: "https://hooks.slack.com/test-webhook"
+  default:
+    recipient: "test-channel"
+
+# Test Logging
+logging:
+  level:
+    me.rgunny.notification: DEBUG
+    io.grpc: WARN

@@ -11,7 +11,7 @@ public class KisApiException extends BusinessException {
     private final String symbol;
     
     public KisApiException(String symbol) {
-        super(StockPriceErrorCode.KIS_API_ERROR);
+        super(StockPriceErrorCode.STOCK_PRICE_005);
         this.symbol = symbol;
     }
     
