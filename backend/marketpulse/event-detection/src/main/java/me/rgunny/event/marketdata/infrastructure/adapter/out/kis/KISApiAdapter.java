@@ -1,15 +1,15 @@
 package me.rgunny.event.marketdata.infrastructure.adapter.out.kis;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.RequiredArgsConstructor;
-import me.rgunny.event.marketdata.domain.exception.kis.KisApiException;
+import lombok.extern.slf4j.Slf4j;
 import me.rgunny.event.marketdata.application.port.out.ExternalApiPort;
 import me.rgunny.event.marketdata.application.port.out.kis.KISCredentialPort;
 import me.rgunny.event.marketdata.application.port.out.kis.KISTokenCachePort;
+import me.rgunny.event.marketdata.domain.exception.kis.KisApiException;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
+import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
 import me.rgunny.event.shared.domain.value.MarketDataType;
 import me.rgunny.event.shared.domain.value.MarketDataValue;
-import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,15 +19,25 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Optional;
 
+@Slf4j
 @Component
-@RequiredArgsConstructor
 public class KISApiAdapter implements ExternalApiPort {
 
-    @Qualifier("kisWebClient")
     private final WebClient webClient;
     private final KISCredentialPort credentialPort;
     private final KISTokenCachePort tokenCachePort;
     private final KISApiProperties kisApiProperties;
+    
+    public KISApiAdapter(@Qualifier("kisWebClient") WebClient webClient,
+                         KISCredentialPort credentialPort,
+                         KISTokenCachePort tokenCachePort,
+                         KISApiProperties kisApiProperties) {
+        this.webClient = webClient;
+        this.credentialPort = credentialPort;
+        this.tokenCachePort = tokenCachePort;
+        this.kisApiProperties = kisApiProperties;
+        log.info("KISApiAdapter initialized with baseUrl: {}", kisApiProperties.baseUrl());
+    }
     
     // KIS OAuth 토큰 유효시간 (24시간)
     private static final Duration TOKEN_TTL = Duration.ofHours(24);
@@ -69,14 +79,32 @@ public class KISApiAdapter implements ExternalApiPort {
                 credentialPort.getDecryptedAppSecret()
         );
 
+        log.info("KIS API Token Request - BaseURL: {}, TokenPath: {}, GrantType: {}, AppKey(masked): {}", 
+                kisApiProperties.baseUrl(), 
+                kisApiProperties.tokenPath(),
+                request.grant_type(),
+                credentialPort.getMaskedAppKey());
+        
         return webClient.post()
                 .uri(kisApiProperties.tokenPath())
                 .header("Content-Type", kisApiProperties.headers().contentType())
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(
+                    status -> status.is4xxClientError() || status.is5xxServerError(),
+                    response -> response.bodyToMono(String.class)
+                        .flatMap(body -> {
+                            log.error("KIS API Token Request Failed - Status: {}, Body: {}", 
+                                    response.statusCode(), body);
+                            return Mono.error(new RuntimeException(
+                                    "KIS API Error: " + response.statusCode() + " - " + body));
+                        })
+                )
                 .bodyToMono(KISTokenResponse.class)
                 .map(KISTokenResponse::getAccessToken)
-                .timeout(Duration.ofSeconds(10));
+                .timeout(Duration.ofSeconds(10))
+                .doOnError(error -> log.error("KIS API Token Request Failed", error))
+                .doOnSuccess(token -> log.info("KIS API Token received successfully"));
     }
 
     public Mono<String> getCachedOrNewToken() {

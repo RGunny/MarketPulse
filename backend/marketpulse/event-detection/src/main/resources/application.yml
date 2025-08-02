@@ -30,8 +30,8 @@ market-data:
   kis: ## 한국투자증권
     enabled: true
     base-url: https://openapi.koreainvestment.com:9443
-    app-key: ENC(ASeLjrVsngF75xUe5V7rd7P6uMxohHxFjrvAih4fKyPG4mxMw0TbrRhahtbBBUzuc/HmmHdNYCENk78L4sMiHA==)
-    app-secret: ENC(Wu7f5NX4BhO8QwL7D6+eHI5EOo99sdF0Vmg/ZMFoYS52ShLhVVFV+Y7vk96rTkM9aguiPDWnhfG/q15Z6OsR4FPQiZuF+RpGpkeW2P4R6D/WGFX7RWunP+C+fXgC3mysYh7MbOtbm0sxGXsrtss/0ZlVBcnzmrG24nWTBrV1qGt7l9Yku9LZbM6+MHUkfmBkZLR4e3yzI9PsT32aJpQd1GiROOvShRPEFeZx5ZBSCr7s2vmnvXqQtIHyGpcdvf+V/eNQLtB5m1bDmV/OILdxD+wzDYnIRxl0)
+    app-key: ENC(bAI2B9y4YYc7jKZEOhk8cmZxG2RqXjfNIKzThRR8M7w88ZDEJ1cOYsGlzjuSRUhfV9fle4sV858+lVdj6oJcwg==)
+    app-secret: ENC(GkUPL4rT6hAAJGHeQpgjEcPaDCw1CD3zL2e5WJkyHmXkXxFO045WND+k07AFNhw9rLfQezBlsOnISWIcnCqlIb9C/ycg2bT1Gkok2UH5HxfrDMD+B7zcMD7s9JC4AiIqMV33zmvUcMjNtmlFiWRcJkZj+XI9zMAQvmPP4pIvuj866LRA0qOh0NGcGZZC8NJyfiJ9e4KVfxzaFQ4s2e/zQQq4cKbxYMkBptiCgTtuOOockGe92lz1QUiepulTSwwEnVhc+z2dxiezojqsGcfDtg==)
     
     # API 경로 설정
     stock-price-transaction-id: FHKST01010100

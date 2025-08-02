@@ -43,11 +43,11 @@ public class KISConnectionService implements CheckKISConnectionUseCase {
                             responseTime
                     );
                 })
-                .onErrorReturn(new KISConnectionStatus(
+                .onErrorResume(error -> Mono.just(new KISConnectionStatus(
                         false,
-                        "Connection error: Network or authentication failure",
+                        "Connection error: " + error.getMessage(),
                         credentialPort.getMaskedAppKey(),
                         System.currentTimeMillis() - startTime
-                ));
+                )));
     }
 }
