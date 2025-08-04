@@ -6,6 +6,7 @@ import me.rgunny.notification.application.usecase.NotificationService;
 import me.rgunny.notification.domain.event.NotificationAuditEvent;
 import me.rgunny.notification.domain.event.PriceAlertEvent;
 import me.rgunny.notification.domain.model.Notification;
+import me.rgunny.notification.domain.model.NotificationChannel;
 import me.rgunny.notification.fixture.NotificationTestFixture;
 import me.rgunny.marketpulse.common.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +48,7 @@ class NotificationServiceTest {
     
     @BeforeEach
     void setUp() {
-        given(slackSender.supports("SLACK")).willReturn(true);
+        given(slackSender.supports(NotificationChannel.SLACK)).willReturn(true);
         given(metrics.startTimer()).willReturn(null); // Timer.Sample mock
         
         notificationService = new NotificationService(
@@ -119,7 +120,7 @@ class NotificationServiceTest {
     void givenUnsupportedChannel_whenSendNotification_thenThrowsBusinessException() {
         // given
         PriceAlertEvent event = NotificationTestFixture.createPriceAlertEvent();
-        given(slackSender.supports("SLACK")).willReturn(false);
+        given(slackSender.supports(NotificationChannel.SLACK)).willReturn(false);
         
         // when
         Mono<Void> result = notificationService.sendNotification(event);

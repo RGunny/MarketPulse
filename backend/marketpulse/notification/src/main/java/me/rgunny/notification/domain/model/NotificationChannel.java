@@ -8,13 +8,13 @@ public enum NotificationChannel {
     SLACK("Slack"), EMAIL("Email")
     ;
 
-    private final String displayName;
+    private final String channel;
     
-    NotificationChannel(String displayName) {
-        this.displayName = displayName;
+    NotificationChannel(String channel) {
+        this.channel = channel;
     }
     
-    public String getDisplayName() {
-        return displayName;
+    public String getChannel() {
+        return channel;
     }
 }
