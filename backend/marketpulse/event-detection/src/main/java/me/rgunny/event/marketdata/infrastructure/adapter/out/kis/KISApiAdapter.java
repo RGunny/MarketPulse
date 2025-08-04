@@ -18,9 +18,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.math.BigDecimal;
 import java.time.Duration;
-import java.util.Optional;
+
+import static me.rgunny.event.marketdata.infrastructure.util.KISFieldParser.toBigDecimal;
+import static me.rgunny.event.marketdata.infrastructure.util.KISFieldParser.toLong;
 
 @Slf4j
 @Component
@@ -164,35 +165,17 @@ public class KISApiAdapter implements ExternalApiPort {
         return StockPrice.createWithTTL(
                 symbol,
                 name,
-                safeParseBigDecimal(output.stck_prpr()),           // 현재가
-                safeParseBigDecimal(output.stck_prdy_clpr()),      // 전일종가
-                safeParseBigDecimal(output.stck_hgpr()),           // 고가
-                safeParseBigDecimal(output.stck_lwpr()),           // 저가
-                safeParseBigDecimal(output.stck_oprc()),           // 시가
-                safeParseLong(output.acml_vol()),                  // 누적거래량
-                safeParseBigDecimal(output.askp1()),               // 매도호가1
-                safeParseBigDecimal(output.bidp1())                // 매수호가1
+                toBigDecimal(output.stck_prpr()),           // 현재가
+                toBigDecimal(output.stck_prdy_clpr()),      // 전일종가
+                toBigDecimal(output.stck_hgpr()),           // 고가
+                toBigDecimal(output.stck_lwpr()),           // 저가
+                toBigDecimal(output.stck_oprc()),           // 시가
+                toLong(output.acml_vol()),                  // 누적거래량
+                toBigDecimal(output.askp1()),               // 매도호가1
+                toBigDecimal(output.bidp1())                // 매수호가1
         );
     }
     
-    /**
-     * 안전한 BigDecimal 변환
-     */
-    private BigDecimal safeParseBigDecimal(String value) {
-        return Optional.ofNullable(value)
-                .filter(v -> !v.isBlank())
-                .map(BigDecimal::new)
-                .orElse(BigDecimal.ZERO);
-    }
-    
-    /**
-     * 안전한 Long 변환
-     */
-    private Long safeParseLong(String value) {
-        return Optional.ofNullable(value)
-                .filter(v -> !v.isBlank())
-                .map(Long::parseLong)
-                .orElse(0L);
-    }
+
 
 }
