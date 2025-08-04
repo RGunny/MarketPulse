@@ -8,6 +8,7 @@ import me.rgunny.event.marketdata.domain.exception.kis.KisApiException;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
 import me.rgunny.event.marketdata.infrastructure.dto.kis.KISCurrentPriceResponse;
+import me.rgunny.event.marketdata.infrastructure.dto.kis.KISCurrentPriceResponseOutput;
 import me.rgunny.event.marketdata.infrastructure.dto.kis.KISTokenRequest;
 import me.rgunny.event.marketdata.infrastructure.dto.kis.KISTokenResponse;
 import me.rgunny.event.shared.domain.value.MarketDataType;
@@ -155,7 +156,7 @@ public class KISApiAdapter implements ExternalApiPort {
             throw new KisApiException(symbol);
         }
         
-        KISCurrentPriceResponse.Output output = response.output();
+        KISCurrentPriceResponseOutput output = response.output();
         
         // null 체크 및 기본값 처리
         String name = symbol; // TODO: 종목마스터 테이블에서 조회하도록 개선
