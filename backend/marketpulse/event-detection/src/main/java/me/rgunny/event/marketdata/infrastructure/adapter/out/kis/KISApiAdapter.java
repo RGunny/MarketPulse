@@ -1,7 +1,6 @@
 package me.rgunny.event.marketdata.infrastructure.adapter.out.kis;
 
 import lombok.extern.slf4j.Slf4j;
-import me.rgunny.event.marketdata.application.port.out.ExternalApiPort;
 import me.rgunny.event.marketdata.application.port.out.kis.KISCredentialPort;
 import me.rgunny.event.marketdata.application.port.out.kis.KISTokenCachePort;
 import me.rgunny.event.marketdata.domain.exception.kis.KisApiException;
@@ -11,8 +10,6 @@ import me.rgunny.event.marketdata.infrastructure.dto.kis.KISCurrentPriceResponse
 import me.rgunny.event.marketdata.infrastructure.dto.kis.KISCurrentPriceResponseOutput;
 import me.rgunny.event.marketdata.infrastructure.dto.kis.KISTokenRequest;
 import me.rgunny.event.marketdata.infrastructure.dto.kis.KISTokenResponse;
-import me.rgunny.event.shared.domain.value.MarketDataType;
-import me.rgunny.event.shared.domain.value.MarketDataValue;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -25,7 +22,7 @@ import static me.rgunny.event.marketdata.infrastructure.util.KISFieldParser.toLo
 
 @Slf4j
 @Component
-public class KISApiAdapter implements ExternalApiPort {
+public class KISApiAdapter {
 
     private final WebClient webClient;
     private final KISCredentialPort credentialPort;
@@ -46,34 +43,6 @@ public class KISApiAdapter implements ExternalApiPort {
     // KIS OAuth 토큰 유효시간 (24시간)
     private static final Duration TOKEN_TTL = Duration.ofHours(24);
 
-    @Override
-    public boolean supports(MarketDataType dataType) {
-        return dataType == MarketDataType.STOCK;
-    }
-    
-    @Override
-    public String getProviderName() {
-        return "KIS";
-    }
-    
-    @Override
-    public int getRateLimitPerMinute() {
-        return 200; // KIS API 제한
-    }
-    
-    @Override
-    public <T extends MarketDataValue> Mono<T> fetchMarketData(String symbol, MarketDataType dataType, Class<T> valueType) {
-        if (!supports(dataType)) {
-            return Mono.error(new IllegalArgumentException("Unsupported data type: " + dataType));
-        }
-        
-        if (dataType == MarketDataType.STOCK && valueType.isAssignableFrom(StockPrice.class)) {
-            return getCurrentPrice(symbol).cast(valueType);
-        }
-        
-        return Mono.error(new IllegalArgumentException("Unsupported value type: " + valueType));
-    }
-    
     // KIS API 전용 메서드들
     public Mono<String> getAccessToken() {
         KISTokenRequest request = new KISTokenRequest(
@@ -110,13 +79,6 @@ public class KISApiAdapter implements ExternalApiPort {
                 .doOnSuccess(token -> log.info("KIS API Token received successfully"));
     }
 
-    public Mono<String> getCachedOrNewToken() {
-        return tokenCachePort.getToken()
-                .filter(token -> token != null && !token.isEmpty())
-                .switchIfEmpty(getAccessTokenAndCache())
-                .onErrorResume(error -> getAccessTokenAndCache());
-    }
-
     public Mono<Boolean> validateConnection() {
         return getCachedOrNewToken()
                 .map(token -> token != null && !token.isEmpty())
@@ -138,12 +100,19 @@ public class KISApiAdapter implements ExternalApiPort {
                         .timeout(Duration.ofSeconds(kisApiProperties.timeouts().responseTimeoutSeconds())));
     }
 
+    private Mono<String> getCachedOrNewToken() {
+        return tokenCachePort.getToken()
+                .filter(token -> token != null && !token.isEmpty())
+                .switchIfEmpty(getAccessTokenAndCache())
+                .onErrorResume(error -> getAccessTokenAndCache());
+    }
+
     /**
      * 새 토큰 발급 후 캐시에 저장
      */
     private Mono<String> getAccessTokenAndCache() {
         return getAccessToken()
-                .flatMap(token -> 
+                .flatMap(token ->
                     tokenCachePort.saveToken(token, TOKEN_TTL)
                         .thenReturn(token)
                 );
@@ -156,12 +125,12 @@ public class KISApiAdapter implements ExternalApiPort {
         if (response == null || response.output() == null) {
             throw new KisApiException(symbol);
         }
-        
+
         KISCurrentPriceResponseOutput output = response.output();
-        
+
         // null 체크 및 기본값 처리
         String name = symbol; // TODO: 종목마스터 테이블에서 조회하도록 개선
-        
+
         return StockPrice.createWithTTL(
                 symbol,
                 name,
@@ -176,6 +145,4 @@ public class KISApiAdapter implements ExternalApiPort {
         );
     }
     
-
-
 }

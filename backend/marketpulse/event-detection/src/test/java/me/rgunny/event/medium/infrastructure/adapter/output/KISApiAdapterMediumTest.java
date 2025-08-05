@@ -182,7 +182,7 @@ class KISApiAdapterMediumTest {
 
         @Test
         @DisplayName("캐시 미스 시 API 호출 후 캐시에 저장한다")
-        void givenCacheMiss_whenGetCachedOrNewToken_thenFetchesAndCaches() throws InterruptedException {
+        void givenCacheMiss_whenValidateConnection_thenFetchesAndCaches() throws InterruptedException {
             // given
             given(credentialPort.getDecryptedAppKey()).willReturn(TEST_APP_KEY);
             given(credentialPort.getDecryptedAppSecret()).willReturn(TEST_APP_SECRET);
@@ -206,11 +206,11 @@ class KISApiAdapterMediumTest {
                     .setBody(responseBody));
 
             // when
-            Mono<String> result = kisApiAdapter.getCachedOrNewToken();
+            Mono<Boolean> result = kisApiAdapter.validateConnection();
 
             // then
             StepVerifier.create(result)
-                    .expectNext(TEST_TOKEN)
+                    .expectNext(true)
                     .verifyComplete();
 
             // API 호출 확인
@@ -252,16 +252,16 @@ class KISApiAdapterMediumTest {
                     .setBody(responseBody));
 
             // when - 두 번 호출
-            Mono<String> firstCall = kisApiAdapter.getCachedOrNewToken();
-            Mono<String> secondCall = kisApiAdapter.getCachedOrNewToken();
+            Mono<Boolean> firstCall = kisApiAdapter.validateConnection();
+            Mono<Boolean> secondCall = kisApiAdapter.validateConnection();
 
             // then
             StepVerifier.create(firstCall)
-                    .expectNext(TEST_TOKEN)
+                    .expectNext(true)
                     .verifyComplete();
 
             StepVerifier.create(secondCall)
-                    .expectNext(TEST_TOKEN)
+                    .expectNext(true)
                     .verifyComplete();
 
             // API는 한 번만 호출됨

@@ -9,8 +9,11 @@ public enum StockPriceErrorCode implements ErrorCode {
     STOCK_PRICE_002("STOCK_PRICE_002", "주식 현재가 강제 갱신에 실패했습니다", HttpStatus.INTERNAL_SERVER_ERROR),
     STOCK_PRICE_003("STOCK_PRICE_003", "주식 현재가 저장에 실패했습니다", HttpStatus.INTERNAL_SERVER_ERROR),
     STOCK_PRICE_004("STOCK_PRICE_004", "올바르지 않은 종목코드입니다", HttpStatus.BAD_REQUEST),
-    STOCK_PRICE_005("STOCK_PRICE_005", "KIS API 호출에 실패했습니다", HttpStatus.INTERNAL_SERVER_ERROR);
-    
+    STOCK_PRICE_005("STOCK_PRICE_005", "KIS API 호출에 실패했습니다", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    STOCK_PRICE_999("STOCK_PRICE_999", "StockPrice 클래스가 아닙니다.", HttpStatus.BAD_REQUEST)
+    ;
+
     private final String code;
     private final String message;
     private final HttpStatus httpStatus;
