@@ -28,7 +28,7 @@ class SlackNotificationAdapterTest {
     @DisplayName("SLACK 채널을 지원한다")
     void givenSlackChannel_whenSupports_thenReturnsTrue() {
         // given
-        String channel = NotificationChannel.SLACK.name();
+        NotificationChannel channel = NotificationChannel.SLACK;
         
         // when
         boolean supports = adapter.supports(channel);
@@ -41,7 +41,7 @@ class SlackNotificationAdapterTest {
     @DisplayName("SLACK이 아닌 다른 채널은 지원하지 않는다")
     void givenNonSlackChannel_whenSupports_thenReturnsFalse() {
         // given
-        String channel = NotificationChannel.EMAIL.name();
+        NotificationChannel channel = NotificationChannel.EMAIL;
         
         // when
         boolean supports = adapter.supports(channel);

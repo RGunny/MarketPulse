@@ -31,23 +31,34 @@ public class KISConnectionService implements CheckKISConnectionUseCase {
 
         long startTime = System.currentTimeMillis();
 
-        return kisApiAdapter.getCachedOrNewToken()
-                .map(token -> {
+        return kisApiAdapter.validateConnection()
+                .map(isConnected -> {
                     long responseTime = System.currentTimeMillis() - startTime;
-                    String message = "Connection successful with cached token";
-
-                    return new KISConnectionStatus(
-                            true,
-                            message,
+                    
+                    if (isConnected) {
+                        return new KISConnectionStatus(
+                                true,
+                                "KIS API connection successful",
+                                credentialPort.getMaskedAppKey(),
+                                responseTime
+                        );
+                    } else {
+                        return new KISConnectionStatus(
+                                false,
+                                "KIS API connection failed",
+                                credentialPort.getMaskedAppKey(),
+                                responseTime
+                        );
+                    }
+                })
+                .onErrorResume(error -> {
+                    long responseTime = System.currentTimeMillis() - startTime;
+                    return Mono.just(new KISConnectionStatus(
+                            false,
+                            "Connection error: " + error.getMessage(),
                             credentialPort.getMaskedAppKey(),
                             responseTime
-                    );
-                })
-                .onErrorResume(error -> Mono.just(new KISConnectionStatus(
-                        false,
-                        "Connection error: " + error.getMessage(),
-                        credentialPort.getMaskedAppKey(),
-                        System.currentTimeMillis() - startTime
-                )));
+                    ));
+                });
     }
 }

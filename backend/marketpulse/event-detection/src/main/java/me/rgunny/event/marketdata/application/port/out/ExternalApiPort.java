@@ -16,20 +16,14 @@ public interface ExternalApiPort {
      * @return 지원 여부
      */
     boolean supports(MarketDataType dataType);
-    
-    /**
-     * API 연결 상태 검증
-     * @return 연결 성공 여부
-     */
-    Mono<Boolean> validateConnection();
-    
+
     /**
      * 시장 데이터 조회 (범용)
      * @param symbol 종목/심볼 코드
      * @param dataType 요청할 데이터 타입
      * @return 시장 데이터
      */
-    <T extends MarketDataValue> Mono<T> fetchMarketData(String symbol, MarketDataType dataType, Class<T> valueType);
+    <T extends MarketDataValue> Mono<T> fetchMarketData(String symbol, MarketDataType dataType, Class<T> clazz);
     
     /**
      * API 제공자 이름

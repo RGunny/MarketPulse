@@ -1,6 +1,7 @@
 package me.rgunny.notification.application.port.out;
 
 import me.rgunny.notification.domain.model.Notification;
+import me.rgunny.notification.domain.model.NotificationChannel;
 import reactor.core.publisher.Mono;
 
 /**
@@ -19,7 +20,8 @@ public interface NotificationSenderPort {
     /**
      * 지원하는 채널 확인
      * 
+     * @param channel 알림 채널
      * @return 지원 여부
      */
-    boolean supports(String channel);
+    boolean supports(NotificationChannel channel);
 }

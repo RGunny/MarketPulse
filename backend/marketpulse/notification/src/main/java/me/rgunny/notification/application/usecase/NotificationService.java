@@ -1,20 +1,22 @@
 package me.rgunny.notification.application.usecase;
 
 import io.micrometer.core.instrument.Timer;
+import lombok.extern.slf4j.Slf4j;
+import me.rgunny.marketpulse.common.exception.BusinessException;
 import me.rgunny.notification.application.port.in.SendNotificationUseCase;
-import me.rgunny.notification.application.port.out.NotificationSenderPort;
 import me.rgunny.notification.application.port.out.NotificationMetricsPort;
+import me.rgunny.notification.application.port.out.NotificationSenderPort;
 import me.rgunny.notification.domain.error.NotificationErrorCode;
-import me.rgunny.notification.domain.event.*;
+import me.rgunny.notification.domain.event.MarketEvent;
+import me.rgunny.notification.domain.event.NotificationAuditEvent;
+import me.rgunny.notification.domain.event.PriceAlertEvent;
 import me.rgunny.notification.domain.model.Notification;
 import me.rgunny.notification.domain.model.NotificationChannel;
 import me.rgunny.notification.domain.model.NotificationType;
-import me.rgunny.marketpulse.common.exception.BusinessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -24,9 +26,8 @@ import java.util.Map;
  * 알림 서비스
  */
 @Service
+@Slf4j
 public class NotificationService implements SendNotificationUseCase {
-    
-    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
     
     private final List<NotificationSenderPort> senders;
     private final ApplicationEventPublisher eventPublisher;
@@ -116,13 +117,11 @@ public class NotificationService implements SendNotificationUseCase {
     }
     
     private Mono<Void> sendToChannel(Notification notification) {
-        return senders.stream()
-                .filter(sender -> sender.supports(notification.channel().name()))
-                .findFirst()
-                .map(sender -> sender.send(notification))
-                .orElse(Mono.error(new BusinessException(
-                        NotificationErrorCode.NOTIFICATION_SEND_003
-                )));
+        return Flux.fromIterable(senders)
+                .filter(sender -> sender.supports(notification.channel()))
+                .next()
+                .switchIfEmpty(Mono.error(new BusinessException(NotificationErrorCode.NOTIFICATION_SEND_003)))
+                .flatMap(sender -> sender.send(notification));
     }
     
 }

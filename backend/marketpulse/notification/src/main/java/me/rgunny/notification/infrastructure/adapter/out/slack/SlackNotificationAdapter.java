@@ -52,8 +52,8 @@ public class SlackNotificationAdapter implements NotificationSenderPort {
     }
     
     @Override
-    public boolean supports(String channel) {
-        return NotificationChannel.SLACK.name().equals(channel);
+    public boolean supports(NotificationChannel channel) {
+        return channel == NotificationChannel.SLACK;
     }
     
     private Payload buildPayload(Notification notification) {
