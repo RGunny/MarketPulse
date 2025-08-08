@@ -1,6 +1,5 @@
 package me.rgunny.marketpulse.common.util;
 
-import io.micrometer.common.util.StringUtils;
 import me.rgunny.marketpulse.common.error.ErrorCode;
 import me.rgunny.marketpulse.common.exception.BusinessException;
 
@@ -12,21 +11,21 @@ public class Validator {
         throw new UnsupportedOperationException("Cannot instantiate utility class");
     }
 
-    public static String requireNotBlank(String value, String fieldName, ErrorCode errorCode) {
-        if (StringUtils.isBlank(value)) {
+    public static String requireNotBlank(String value, ErrorCode errorCode) {
+        if (value == null || value.isBlank()) {
             throw new BusinessException(errorCode);
         }
         return value;
     }
 
-    public static <T> T requireNotNull(T value, String fieldName, ErrorCode errorCode) {
+    public static <T> T requireNotNull(T value, ErrorCode errorCode) {
         if (value == null) {
             throw new BusinessException(errorCode);
         }
         return value;
     }
 
-    public static void requirePattern(String value, String regex, String fieldName, ErrorCode errorCode) {
+    public static void requirePattern(String value, String regex, ErrorCode errorCode) {
         if (value == null || !Pattern.matches(regex, value)) {
             throw new BusinessException(errorCode);
         }

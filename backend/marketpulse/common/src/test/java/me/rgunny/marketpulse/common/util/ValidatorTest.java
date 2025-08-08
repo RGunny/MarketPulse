@@ -38,12 +38,12 @@ class ValidatorTest {
         @DisplayName("null 또는 공백일 경우 예외를 던진다")
         void should_throw_when_blank() {
             Assertions.assertThatThrownBy(() ->
-                            Validator.requireNotBlank("   ", "field", DummyErrorCode.FIELD_REQUIRED))
+                            Validator.requireNotBlank("   ", DummyErrorCode.FIELD_REQUIRED))
                     .isInstanceOf(BusinessException.class)
                     .hasMessage("Field is required");
 
             Assertions.assertThatThrownBy(() ->
-                            Validator.requireNotBlank(null, "field", DummyErrorCode.FIELD_REQUIRED))
+                            Validator.requireNotBlank(null, DummyErrorCode.FIELD_REQUIRED))
                     .isInstanceOf(BusinessException.class)
                     .hasMessage("Field is required");
         }
@@ -52,7 +52,7 @@ class ValidatorTest {
         @DisplayName("정상 입력이면 그대로 반환한다")
         void should_return_value_when_valid() {
             String input = "valid";
-            String result = Validator.requireNotBlank(input, "field", DummyErrorCode.FIELD_REQUIRED);
+            String result = Validator.requireNotBlank(input, DummyErrorCode.FIELD_REQUIRED);
 
             Assertions.assertThat(result).isEqualTo(input);
         }
@@ -66,7 +66,7 @@ class ValidatorTest {
         @DisplayName("null이면 예외를 던진다")
         void should_throw_when_null() {
             Assertions.assertThatThrownBy(() ->
-                            Validator.requireNotNull(null, "field", DummyErrorCode.VALUE_REQUIRED))
+                            Validator.requireNotNull(null, DummyErrorCode.VALUE_REQUIRED))
                     .isInstanceOf(BusinessException.class)
                     .hasMessage("Value must not be null");
         }
@@ -75,7 +75,7 @@ class ValidatorTest {
         @DisplayName("null이 아니면 그대로 반환한다")
         void should_return_value_when_not_null() {
             Integer input = 42;
-            Integer result = Validator.requireNotNull(input, "field", DummyErrorCode.VALUE_REQUIRED);
+            Integer result = Validator.requireNotNull(input, DummyErrorCode.VALUE_REQUIRED);
 
             Assertions.assertThat(result).isEqualTo(42);
         }
@@ -89,7 +89,7 @@ class ValidatorTest {
         @DisplayName("패턴이 맞지 않으면 예외를 던진다")
         void should_throw_when_pattern_does_not_match() {
             Assertions.assertThatThrownBy(() ->
-                            Validator.requirePattern("abc", "\\d{6}", "symbol", DummyErrorCode.INVALID_FORMAT))
+                            Validator.requirePattern("abc", "\\d{6}", DummyErrorCode.INVALID_FORMAT))
                     .isInstanceOf(BusinessException.class)
                     .hasMessage("Invalid format");
         }
@@ -98,7 +98,7 @@ class ValidatorTest {
         @DisplayName("패턴이 맞으면 예외가 발생하지 않는다")
         void should_pass_when_pattern_matches() {
             Assertions.assertThatCode(() ->
-                            Validator.requirePattern("123456", "\\d{6}", "symbol", DummyErrorCode.INVALID_FORMAT))
+                            Validator.requirePattern("123456", "\\d{6}", DummyErrorCode.INVALID_FORMAT))
                     .doesNotThrowAnyException();
         }
     }
