@@ -2,6 +2,7 @@ package me.rgunny.event.medium.infrastructure.adapter.output;
 
 import me.rgunny.event.marketdata.application.port.out.kis.KISCredentialPort;
 import me.rgunny.event.marketdata.application.port.out.kis.KISTokenCachePort;
+import me.rgunny.event.marketdata.application.port.out.shared.StockPort;
 import me.rgunny.event.marketdata.infrastructure.adapter.out.kis.KISApiAdapter;
 import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
 import okhttp3.mockwebserver.MockResponse;
@@ -24,20 +25,15 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
-/**
- * KISApiAdapter 통합 테스트 (Medium Test)
- * 
- * MockWebServer를 사용하여 실제 HTTP 통신을 시뮬레이션합니다.
- * 이는 실무에서 외부 API 연동을 테스트하는 표준 방법입니다.
- */
 @DisplayName("KISApiAdapter - HTTP 통합 테스트 (medium)")
-class KISApiAdapterMediumTest {
+class KISApiAdapterTest {
 
     private MockWebServer mockWebServer;
     private KISApiAdapter kisApiAdapter;
     
     @Mock private KISCredentialPort credentialPort;
     @Mock private KISTokenCachePort tokenCachePort;
+    @Mock private StockPort stockPort;
     @Mock private KISApiProperties kisApiProperties;
     
     private static final String TEST_APP_KEY = "test-app-key";
@@ -60,7 +56,7 @@ class KISApiAdapterMediumTest {
                 .build();
         
         // Adapter 생성
-        kisApiAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, kisApiProperties);
+        kisApiAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, stockPort, kisApiProperties);
     }
 
     @AfterEach
@@ -158,7 +154,7 @@ class KISApiAdapterMediumTest {
                     .build();
             
             // 테스트용 짧은 타임아웃을 가진 adapter 생성
-            KISApiAdapter testAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, kisApiProperties) {
+            KISApiAdapter testAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, stockPort, kisApiProperties) {
                 @Override
                 public Mono<String> getAccessToken() {
                     // 테스트를 위해 50ms 타임아웃 적용
