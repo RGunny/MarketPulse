@@ -3,6 +3,7 @@ package me.rgunny.event.medium.infrastructure.adapter.output;
 import me.rgunny.event.marketdata.application.port.out.kis.KISCredentialPort;
 import me.rgunny.event.marketdata.application.port.out.kis.KISTokenCachePort;
 import me.rgunny.event.marketdata.application.port.out.shared.StockPort;
+import me.rgunny.event.marketdata.domain.exception.kis.KisApiException;
 import me.rgunny.event.marketdata.infrastructure.adapter.out.kis.KISApiAdapter;
 import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
 import okhttp3.mockwebserver.MockResponse;
@@ -130,7 +131,8 @@ class KISApiAdapterTest {
             // then
             StepVerifier.create(result)
                     .expectErrorMatches(throwable -> 
-                            throwable.getMessage().contains("401"))
+                            throwable instanceof KisApiException &&
+                            throwable.getMessage().contains("KIS API"))
                     .verify();
         }
 

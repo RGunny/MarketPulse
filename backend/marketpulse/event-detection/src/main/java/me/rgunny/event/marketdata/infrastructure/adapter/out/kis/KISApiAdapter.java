@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.rgunny.event.marketdata.application.port.out.kis.KISCredentialPort;
 import me.rgunny.event.marketdata.application.port.out.kis.KISTokenCachePort;
 import me.rgunny.event.marketdata.application.port.out.shared.StockPort;
+import me.rgunny.event.marketdata.domain.error.StockPriceErrorCode;
 import me.rgunny.event.marketdata.domain.exception.kis.KisApiException;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
@@ -47,6 +48,9 @@ public class KISApiAdapter {
     // KIS OAuth 토큰 유효시간 (24시간)
     private static final Duration TOKEN_TTL = Duration.ofHours(24);
 
+    // API 호출 타임아웃 (10초)
+    private static final Duration API_TIMEOUT = Duration.ofSeconds(10);
+
     // KIS API 전용 메서드들
     public Mono<String> getAccessToken() {
         KISTokenRequest request = new KISTokenRequest(
@@ -72,13 +76,14 @@ public class KISApiAdapter {
                         .flatMap(body -> {
                             log.error("KIS API Token Request Failed - Status: {}, Body: {}", 
                                     response.statusCode(), body);
-                            return Mono.error(new RuntimeException(
-                                    "KIS API Error: " + response.statusCode() + " - " + body));
+                            return Mono.error(new KisApiException(
+                                    StockPriceErrorCode.STOCK_PRICE_005,
+                                    "Token Request Failed: " + response.statusCode() + " - " + body));
                         })
                 )
                 .bodyToMono(KISTokenResponse.class)
                 .map(KISTokenResponse::getAccessToken)
-                .timeout(Duration.ofSeconds(10))
+                .timeout(API_TIMEOUT)
                 .doOnError(error -> log.error("KIS API Token Request Failed", error))
                 .doOnSuccess(token -> log.info("KIS API Token received successfully"));
     }
