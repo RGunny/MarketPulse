@@ -2,6 +2,7 @@ package me.rgunny.event.marketdata.infrastructure.config;
 
 import jakarta.validation.constraints.NotNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
@@ -11,50 +12,24 @@ import java.math.BigDecimal;
  */
 @ConfigurationProperties(prefix = "marketpulse.alert.price")
 @Validated
-public class PriceAlertProperties {
-    
+public record PriceAlertProperties(
+
     @NotNull
-    private BigDecimal riseThreshold;
-    
+    BigDecimal riseThreshold,
+
     @NotNull
-    private BigDecimal fallThreshold;
-    
+    BigDecimal fallThreshold,
+
     @NotNull
-    private BigDecimal limitUpThreshold;
-    
+    BigDecimal limitUpThreshold,
+
     @NotNull
-    private BigDecimal limitDownThreshold;
-    
-    // Getters and Setters
-    public BigDecimal getRiseThreshold() {
-        return riseThreshold;
-    }
-    
-    public void setRiseThreshold(BigDecimal riseThreshold) {
-        this.riseThreshold = riseThreshold;
-    }
-    
-    public BigDecimal getFallThreshold() {
-        return fallThreshold;
-    }
-    
-    public void setFallThreshold(BigDecimal fallThreshold) {
-        this.fallThreshold = fallThreshold;
-    }
-    
-    public BigDecimal getLimitUpThreshold() {
-        return limitUpThreshold;
-    }
-    
-    public void setLimitUpThreshold(BigDecimal limitUpThreshold) {
-        this.limitUpThreshold = limitUpThreshold;
-    }
-    
-    public BigDecimal getLimitDownThreshold() {
-        return limitDownThreshold;
-    }
-    
-    public void setLimitDownThreshold(BigDecimal limitDownThreshold) {
-        this.limitDownThreshold = limitDownThreshold;
-    }
-}
+    BigDecimal limitDownThreshold,
+
+    @DefaultValue("30")
+    Integer cooldownMinutes,
+
+    @DefaultValue("60")
+    Integer limitCooldownMinutes
+
+) {}

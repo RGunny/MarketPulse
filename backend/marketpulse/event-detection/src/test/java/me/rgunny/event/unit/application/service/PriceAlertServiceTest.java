@@ -4,6 +4,7 @@ import me.rgunny.event.marketdata.application.usecase.PriceAlertService;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.infrastructure.config.PriceAlertProperties;
 import me.rgunny.event.notification.application.port.out.NotificationClientPort;
+import me.rgunny.event.notification.application.port.out.NotificationHistoryPort;
 import me.rgunny.notification.grpc.NotificationServiceProto.NotificationStatus;
 import me.rgunny.notification.grpc.NotificationServiceProto.PriceAlertType;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import reactor.test.StepVerifier;
 import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -37,17 +39,27 @@ class PriceAlertServiceTest {
     private NotificationClientPort notificationClient;
     
     @Mock
-    private PriceAlertProperties alertProperties;
-    
+    private NotificationHistoryPort notificationHistoryPort;
+
     @BeforeEach
     void setUp() {
-        // PriceAlertProperties mock 설정 - lenient로 설정하여 모든 테스트에서 사용할 수 있도록 함
-        lenient().when(alertProperties.getRiseThreshold()).thenReturn(new BigDecimal("5.0"));
-        lenient().when(alertProperties.getFallThreshold()).thenReturn(new BigDecimal("-5.0"));
-        lenient().when(alertProperties.getLimitUpThreshold()).thenReturn(new BigDecimal("29.5"));
-        lenient().when(alertProperties.getLimitDownThreshold()).thenReturn(new BigDecimal("-29.5"));
+        PriceAlertProperties alertProperties = new PriceAlertProperties(
+                new BigDecimal("5.0"),
+                new BigDecimal("-5.0"),
+                new BigDecimal("29.5"),
+                new BigDecimal("-29.5"),
+                30,
+                60
+        );
         
-        priceAlertService = new PriceAlertService(notificationClient, alertProperties);
+        // NotificationHistoryPort mock 기본 설정 - 쿨다운 없음
+        lenient().when(notificationHistoryPort.isInCooldown(anyString(), any()))
+                .thenReturn(Mono.just(false));
+        // save 메서드는 저장된 객체를 반환해야 함
+        lenient().when(notificationHistoryPort.save(any()))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        
+        priceAlertService = new PriceAlertService(notificationClient, notificationHistoryPort, alertProperties);
     }
     
     @Test
@@ -151,10 +163,10 @@ class PriceAlertServiceTest {
                 "삼성전자",
                 currentPrice,
                 previousClose,
-                new BigDecimal("72000"), // 고가
-                new BigDecimal("69000"), // 저가
-                new BigDecimal("70500"), // 시가
-                1500000L, // 거래량
+                new BigDecimal("72000"),
+                new BigDecimal("69000"),
+                new BigDecimal("70500"),
+                1500000L,
                 currentPrice.add(new BigDecimal("100")), // 매도호가1
                 currentPrice.subtract(new BigDecimal("100")) // 매수호가1
         );

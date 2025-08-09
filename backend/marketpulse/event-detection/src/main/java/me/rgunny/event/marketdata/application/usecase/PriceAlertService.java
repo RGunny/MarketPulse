@@ -3,6 +3,8 @@ package me.rgunny.event.marketdata.application.usecase;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.infrastructure.config.PriceAlertProperties;
 import me.rgunny.event.notification.application.port.out.NotificationClientPort;
+import me.rgunny.event.notification.application.port.out.NotificationHistoryPort;
+import me.rgunny.event.notification.domain.model.NotificationHistory;
 import me.rgunny.notification.grpc.NotificationServiceProto.PriceAlertType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.util.UUID;
 
 /**
  * 가격 알림 서비스
@@ -21,15 +25,23 @@ public class PriceAlertService {
     private static final Logger log = LoggerFactory.getLogger(PriceAlertService.class);
     
     private final NotificationClientPort notificationClient;
+    private final NotificationHistoryPort notificationHistoryPort;
     private final PriceAlertProperties alertProperties;
     
-    public PriceAlertService(NotificationClientPort notificationClient, PriceAlertProperties alertProperties) {
+    // 기본 쿨다운: 30분
+    private static final Duration DEFAULT_COOLDOWN = Duration.ofMinutes(30);
+    private static final Duration LIMIT_COOLDOWN = Duration.ofMinutes(60);
+    
+    public PriceAlertService(NotificationClientPort notificationClient, 
+                           NotificationHistoryPort notificationHistoryPort,
+                           PriceAlertProperties alertProperties) {
         this.notificationClient = notificationClient;
+        this.notificationHistoryPort = notificationHistoryPort;
         this.alertProperties = alertProperties;
     }
     
     /**
-     * 주식 가격 변동 분석 및 알림 발송
+     * 주식 가격 변동 분석 및 알림 발송 (중복 방지 적용)
      * @param stockPrice 주식 가격 정보
      * @return 알림 발송 결과
      */
@@ -38,14 +50,11 @@ public class PriceAlertService {
             PriceAlertType alertType = determineAlertType(stockPrice);
             
             if (alertType != PriceAlertType.NONE) {
-                log.info("Price alert triggered: symbol={}, alertType={}, changeRate={}", 
+                log.info("Price alert triggered: symbol={}, alertType={}, changeRate={}%", 
                         stockPrice.getSymbol(), alertType, stockPrice.getChangeRate());
                 
-                return notificationClient.sendPriceAlert(stockPrice, alertType)
-                        .doOnSuccess(unused -> log.info("Price alert sent successfully: symbol={}, alertType={}", 
-                                stockPrice.getSymbol(), alertType))
-                        .doOnError(error -> log.error("Failed to send price alert: symbol={}, alertType={}, error={}", 
-                                stockPrice.getSymbol(), alertType, error.getMessage()));
+                // 중복 체크 후 알림 발송
+                return checkCooldownAndSend(stockPrice, alertType);
             } else {
                 log.debug("No alert needed for symbol={}, changeRate={}", 
                         stockPrice.getSymbol(), stockPrice.getChangeRate());
@@ -53,6 +62,78 @@ public class PriceAlertService {
             }
         });
     }
+    
+    /**
+     * 쿨다운 체크 후 알림 발송
+     */
+    private Mono<Void> checkCooldownAndSend(StockPrice stockPrice, PriceAlertType alertType) {
+        String symbol = stockPrice.getSymbol();
+        
+        return notificationHistoryPort.isInCooldown(symbol, alertType)
+            .flatMap(isInCooldown -> {
+                if (isInCooldown) {
+                    return notificationHistoryPort.getRemainingCooldown(symbol, alertType)
+                        .doOnNext(remaining -> log.info(
+                            "Alert skipped due to cooldown: symbol={}, type={}, remaining={}m {}s",
+                            symbol, alertType, remaining.toMinutes(), remaining.toSecondsPart()))
+                        .then(Mono.empty());
+                } else {
+                    return sendAlertAndSaveHistory(stockPrice, alertType);
+                }
+            });
+    }
+    
+    /**
+     * 알림 발송 및 이력 저장
+     */
+    private Mono<Void> sendAlertAndSaveHistory(StockPrice stockPrice, PriceAlertType alertType) {
+        String notificationId = UUID.randomUUID().toString();
+        
+        return notificationClient.sendPriceAlert(stockPrice, alertType)
+            .doOnSuccess(unused -> log.info("Alert sent successfully: symbol={}, type={}, price={}",
+                stockPrice.getSymbol(), alertType, stockPrice.getCurrentPrice()))
+            .then(saveNotificationHistory(stockPrice, alertType, notificationId))
+            .then()
+            .doOnError(error -> log.error("Failed to send price alert: symbol={}, type={}, error={}", 
+                stockPrice.getSymbol(), alertType, error.getMessage()));
+    }
+    
+    /**
+     * 알림 이력 저장
+     */
+    private Mono<NotificationHistory> saveNotificationHistory(
+            StockPrice stockPrice, 
+            PriceAlertType alertType, 
+            String notificationId) {
+        
+        Duration cooldown = determineCooldownPeriod(alertType);
+        
+        NotificationHistory history = NotificationHistory.create(
+            stockPrice.getSymbol(),
+            stockPrice.getName(),
+            alertType,
+            stockPrice.getCurrentPrice(),
+            stockPrice.getChangeRate(),
+            notificationId,
+            cooldown
+        );
+        
+        return notificationHistoryPort.save(history)
+            .doOnSuccess(saved -> log.debug("Notification history saved: symbol={}, type={}, cooldown={}",
+                saved.symbol(), saved.alertType(), saved.cooldownPeriod()));
+    }
+    
+    /**
+     * 알림 타입별 쿨다운 기간 결정
+     */
+    private Duration determineCooldownPeriod(PriceAlertType alertType) {
+        return switch (alertType) {
+            case LIMIT_UP, LIMIT_DOWN -> LIMIT_COOLDOWN;  // 상한가/하한가: 60분
+            case RISE, FALL -> DEFAULT_COOLDOWN;          // 급등/급락: 30분
+            case NONE, UNRECOGNIZED -> DEFAULT_COOLDOWN;
+        };
+    }
+    
     
     /**
      * 알림 유형 결정
@@ -63,22 +144,22 @@ public class PriceAlertService {
         BigDecimal changeRate = stockPrice.getChangeRate();
         
         // 상한가 확인 - 설정된 임계값 이상
-        if (changeRate.compareTo(alertProperties.getLimitUpThreshold()) >= 0) {
+        if (changeRate.compareTo(alertProperties.limitUpThreshold()) >= 0) {
             return PriceAlertType.LIMIT_UP;
         }
         
         // 하한가 확인 - 설정된 임계값 이하
-        if (changeRate.compareTo(alertProperties.getLimitDownThreshold()) <= 0) {
+        if (changeRate.compareTo(alertProperties.limitDownThreshold()) <= 0) {
             return PriceAlertType.LIMIT_DOWN;
         }
         
         // 급등 확인 - 설정된 임계값 이상
-        if (changeRate.compareTo(alertProperties.getRiseThreshold()) >= 0) {
+        if (changeRate.compareTo(alertProperties.riseThreshold()) >= 0) {
             return PriceAlertType.RISE;
         }
         
         // 급락 확인 - 설정된 임계값 이하
-        if (changeRate.compareTo(alertProperties.getFallThreshold()) <= 0) {
+        if (changeRate.compareTo(alertProperties.fallThreshold()) <= 0) {
             return PriceAlertType.FALL;
         }
         
