@@ -1,44 +1,45 @@
 package me.rgunny.event.marketdata.application.usecase;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import me.rgunny.event.marketdata.application.port.out.AlertHistoryPort;
+import me.rgunny.event.marketdata.domain.model.AlertHistory;
+import me.rgunny.event.marketdata.domain.model.AlertType;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.infrastructure.config.PriceAlertProperties;
 import me.rgunny.event.notification.application.port.out.NotificationClientPort;
 import me.rgunny.event.notification.application.port.out.NotificationHistoryPort;
 import me.rgunny.event.notification.domain.model.NotificationHistory;
 import me.rgunny.notification.grpc.NotificationServiceProto.PriceAlertType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.UUID;
 
 /**
  * 가격 알림 서비스
- * - 주식 가격 변동 감지 시 알림 발송
+ * 
+ * 핵심 개선:
+ * - Clock 주입으로 테스트 가능성 확보
+ * - AlertHistory와 일관된 시간 처리
  */
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class PriceAlertService {
-    
-    private static final Logger log = LoggerFactory.getLogger(PriceAlertService.class);
     
     private final NotificationClientPort notificationClient;
     private final NotificationHistoryPort notificationHistoryPort;
+    private final AlertHistoryPort alertHistoryPort;
     private final PriceAlertProperties alertProperties;
+    private final Clock clock;
     
     // 기본 쿨다운: 30분
-    private static final Duration DEFAULT_COOLDOWN = Duration.ofMinutes(30);
-    private static final Duration LIMIT_COOLDOWN = Duration.ofMinutes(60);
-    
-    public PriceAlertService(NotificationClientPort notificationClient, 
-                           NotificationHistoryPort notificationHistoryPort,
-                           PriceAlertProperties alertProperties) {
-        this.notificationClient = notificationClient;
-        this.notificationHistoryPort = notificationHistoryPort;
-        this.alertProperties = alertProperties;
-    }
+    private static final int DEFAULT_COOLDOWN_MINUTES = 30;
+    private static final int LIMIT_COOLDOWN_MINUTES = 60;
     
     /**
      * 주식 가격 변동 분석 및 알림 발송 (중복 방지 적용)
@@ -68,14 +69,18 @@ public class PriceAlertService {
      */
     private Mono<Void> checkCooldownAndSend(StockPrice stockPrice, PriceAlertType alertType) {
         String symbol = stockPrice.getSymbol();
+        AlertType historyType = mapToAlertHistoryType(alertType);
         
-        return notificationHistoryPort.isInCooldown(symbol, alertType)
-            .flatMap(isInCooldown -> {
-                if (isInCooldown) {
-                    return notificationHistoryPort.getRemainingCooldown(symbol, alertType)
-                        .doOnNext(remaining -> log.info(
-                            "Alert skipped due to cooldown: symbol={}, type={}, remaining={}m {}s",
-                            symbol, alertType, remaining.toMinutes(), remaining.toSecondsPart()))
+        return alertHistoryPort.canSendAlert(symbol, historyType)
+            .flatMap(canSend -> {
+                if (!canSend) {
+                    return alertHistoryPort.findBySymbolAndType(symbol, historyType)
+                        .doOnNext(history -> {
+                            Duration remaining = history.getRemainingCooldown(clock);
+                            log.info(
+                                "Alert skipped due to cooldown: symbol={}, type={}, remaining={}m {}s",
+                                symbol, alertType, remaining.toMinutes(), remaining.toSecondsPart());
+                        })
                         .then(Mono.empty());
                 } else {
                     return sendAlertAndSaveHistory(stockPrice, alertType);
@@ -88,10 +93,14 @@ public class PriceAlertService {
      */
     private Mono<Void> sendAlertAndSaveHistory(StockPrice stockPrice, PriceAlertType alertType) {
         String notificationId = UUID.randomUUID().toString();
+        AlertType historyType = mapToAlertHistoryType(alertType);
+        int cooldownMinutes = determineCooldownMinutes(alertType);
         
         return notificationClient.sendPriceAlert(stockPrice, alertType)
             .doOnSuccess(unused -> log.info("Alert sent successfully: symbol={}, type={}, price={}",
                 stockPrice.getSymbol(), alertType, stockPrice.getCurrentPrice()))
+            .then(alertHistoryPort.save(
+                AlertHistory.create(stockPrice.getSymbol(), historyType, cooldownMinutes, clock)))
             .then(saveNotificationHistory(stockPrice, alertType, notificationId))
             .then()
             .doOnError(error -> log.error("Failed to send price alert: symbol={}, type={}, error={}", 
@@ -124,13 +133,33 @@ public class PriceAlertService {
     }
     
     /**
-     * 알림 타입별 쿨다운 기간 결정
+     * 알림 타입별 쿨다운 기간 결정 (분 단위)
+     */
+    private int determineCooldownMinutes(PriceAlertType alertType) {
+        return switch (alertType) {
+            case LIMIT_UP, LIMIT_DOWN -> LIMIT_COOLDOWN_MINUTES;  // 상한가/하한가: 60분
+            case RISE, FALL -> DEFAULT_COOLDOWN_MINUTES;          // 급등/급락: 30분
+            case NONE, UNRECOGNIZED -> DEFAULT_COOLDOWN_MINUTES;
+        };
+    }
+    
+    /**
+     * 알림 타입별 쿨다운 기간 결정 (Duration)
      */
     private Duration determineCooldownPeriod(PriceAlertType alertType) {
-        return switch (alertType) {
-            case LIMIT_UP, LIMIT_DOWN -> LIMIT_COOLDOWN;  // 상한가/하한가: 60분
-            case RISE, FALL -> DEFAULT_COOLDOWN;          // 급등/급락: 30분
-            case NONE, UNRECOGNIZED -> DEFAULT_COOLDOWN;
+        return Duration.ofMinutes(determineCooldownMinutes(alertType));
+    }
+    
+    /**
+     * PriceAlertType을 AlertType으로 매핑
+     */
+    private AlertType mapToAlertHistoryType(PriceAlertType priceAlertType) {
+        return switch (priceAlertType) {
+            case RISE -> AlertType.PRICE_RISE;
+            case FALL -> AlertType.PRICE_FALL;
+            case LIMIT_UP -> AlertType.LIMIT_UP;
+            case LIMIT_DOWN -> AlertType.LIMIT_DOWN;
+            default -> AlertType.PRICE_RISE; // 기본값
         };
     }
     

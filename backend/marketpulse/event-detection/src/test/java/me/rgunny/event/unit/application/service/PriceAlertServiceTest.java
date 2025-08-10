@@ -1,6 +1,9 @@
 package me.rgunny.event.unit.application.service;
 
+import me.rgunny.event.marketdata.application.port.out.AlertHistoryPort;
 import me.rgunny.event.marketdata.application.usecase.PriceAlertService;
+import me.rgunny.event.marketdata.domain.model.AlertHistory;
+import me.rgunny.event.marketdata.domain.model.AlertType;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.infrastructure.config.PriceAlertProperties;
 import me.rgunny.event.notification.application.port.out.NotificationClientPort;
@@ -16,15 +19,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.math.BigDecimal;
+import me.rgunny.event.support.TestClockFactory;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import java.math.BigDecimal;
+import java.time.Clock;
+
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.*;
 
 /**
  * PriceAlertService 단위 테스트
@@ -40,6 +42,9 @@ class PriceAlertServiceTest {
     
     @Mock
     private NotificationHistoryPort notificationHistoryPort;
+    
+    @Mock
+    private AlertHistoryPort alertHistoryPort;
 
     @BeforeEach
     void setUp() {
@@ -52,6 +57,9 @@ class PriceAlertServiceTest {
                 60
         );
         
+        // TestClockFactory 사용
+        Clock fixedClock = TestClockFactory.marketMiddle();
+        
         // NotificationHistoryPort mock 기본 설정 - 쿨다운 없음
         lenient().when(notificationHistoryPort.isInCooldown(anyString(), any()))
                 .thenReturn(Mono.just(false));
@@ -59,7 +67,13 @@ class PriceAlertServiceTest {
         lenient().when(notificationHistoryPort.save(any()))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
         
-        priceAlertService = new PriceAlertService(notificationClient, notificationHistoryPort, alertProperties);
+        // AlertHistoryPort mock 기본 설정 - 쿨다운 없음
+        lenient().when(alertHistoryPort.canSendAlert(anyString(), any(AlertType.class)))
+                .thenReturn(Mono.just(true));
+        lenient().when(alertHistoryPort.save(any(AlertHistory.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        
+        priceAlertService = new PriceAlertService(notificationClient, notificationHistoryPort, alertHistoryPort, alertProperties, fixedClock);
     }
     
     @Test

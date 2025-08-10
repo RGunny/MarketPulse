@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.rgunny.event.notification.application.port.out.NotificationHistoryPort;
 import me.rgunny.event.notification.domain.model.NotificationHistory;
 import me.rgunny.notification.grpc.NotificationServiceProto.PriceAlertType;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -21,11 +22,17 @@ import java.time.Duration;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class NotificationHistoryRedisAdapter implements NotificationHistoryPort {
     
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
+    
+    public NotificationHistoryRedisAdapter(
+            @Qualifier("reactiveRedisTemplate") ReactiveRedisTemplate<String, String> redisTemplate,
+            ObjectMapper objectMapper) {
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
+    }
     
     private static final String KEY_PREFIX = "notification:history:";
     

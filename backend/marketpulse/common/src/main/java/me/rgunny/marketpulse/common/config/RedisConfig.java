@@ -1,14 +1,15 @@
 package me.rgunny.marketpulse.common.config;
 
+import me.rgunny.marketpulse.common.config.redis.RedisTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
- * Redis 설정
+ * Redis 공통 설정
+ * 
+ * 각 모듈에서 필요한 기본 Redis 설정 제공
  */
 @Configuration
 public class RedisConfig {
@@ -16,21 +17,11 @@ public class RedisConfig {
     /**
      * String 타입 전용 ReactiveRedisTemplate
      * - KIS 토큰 캐싱용으로 최적화
+     * - 간단한 키-값 캐싱에 사용
      */
     @Bean
     public ReactiveRedisTemplate<String, String> reactiveRedisTemplate(
             ReactiveRedisConnectionFactory connectionFactory) {
-        
-        StringRedisSerializer serializer = new StringRedisSerializer();
-        
-        RedisSerializationContext<String, String> context = RedisSerializationContext
-                .<String, String>newSerializationContext()
-                .key(serializer)
-                .value(serializer)
-                .hashKey(serializer)
-                .hashValue(serializer)
-                .build();
-                
-        return new ReactiveRedisTemplate<>(connectionFactory, context);
+        return RedisTemplateBuilder.stringTemplate(connectionFactory);
     }
 }
