@@ -9,13 +9,25 @@ import me.rgunny.event.marketdata.domain.error.StockPriceErrorCode;
 public class KisApiException extends BusinessException {
     
     private final String symbol;
+    private final String detail;
     
     public KisApiException(String symbol) {
         super(StockPriceErrorCode.STOCK_PRICE_005);
         this.symbol = symbol;
+        this.detail = null;
+    }
+    
+    public KisApiException(StockPriceErrorCode errorCode, String detail) {
+        super(errorCode);
+        this.symbol = null;
+        this.detail = detail;
     }
     
     public String getSymbol() {
         return symbol;
+    }
+    
+    public String getDetail() {
+        return detail;
     }
 }

@@ -3,6 +3,7 @@ package me.rgunny.event.marketdata.infrastructure.adapter.in.scheduler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.rgunny.event.marketdata.application.port.in.CollectStockPriceUseCase;
+import me.rgunny.event.marketdata.application.port.in.MarketHoursUseCase;
 import me.rgunny.event.marketdata.infrastructure.config.shared.StockCollectionProperties;
 import me.rgunny.event.watchlist.application.port.out.WatchTargetPort;
 import me.rgunny.event.watchlist.domain.model.WatchTarget;
@@ -31,6 +32,7 @@ public class StockPriceCollectionScheduler {
 
     private final WatchTargetPort watchTargetPort;
     private final CollectStockPriceUseCase collectStockPriceUseCase;
+    private final MarketHoursUseCase marketHoursUseCase;
     private final StockCollectionProperties properties;
     
     // 마지막 수집 시간 추적을 위한 맵
@@ -53,11 +55,16 @@ public class StockPriceCollectionScheduler {
     /**
      * 전체 활성 종목 주기적 수집
      * 
-     * 30초마다 실행되며, 모든 활성 종목의 현재가를 수집합니다.
+     * 30초마다 실행되며, 모든 활성 종목의 현재가를 수집
+     * 장시간이 아닌 경우 실행하지 않음.
      */
     @Scheduled(fixedDelayString = "#{T(java.time.Duration).parse('${app.stock-collection.schedule.active-stocks:PT30S}').toMillis()}", 
               initialDelayString = "#{T(java.time.Duration).parse('${app.stock-collection.schedule.initial-delay:PT10S}').toMillis()}")
     public void collectActiveStocks() {
+        if (!marketHoursUseCase.isMarketOpen()) {
+            log.debug("Market is closed. Skipping active stocks collection.");
+            return;
+        }
         collectActiveStocksReactive().subscribe();
     }
     
@@ -95,11 +102,16 @@ public class StockPriceCollectionScheduler {
     /**
      * 높은 우선순위 종목 주기적 수집
      * 
-     * 15초마다 실행되며, 우선순위가 높은 종목들의 현재가를 수집합니다.
+     * 15초마다 실행되며, 우선순위가 높은 종목들의 현재가를 수집
+     * 장시간이 아닌 경우 실행하지 않음.
      */
     @Scheduled(fixedDelayString = "#{T(java.time.Duration).parse('${app.stock-collection.schedule.high-priority:PT15S}').toMillis()}", 
               initialDelayString = "#{T(java.time.Duration).parse('${app.stock-collection.schedule.high-priority-delay:PT5S}').toMillis()}")
     public void collectHighPriorityStocks() {
+        if (!marketHoursUseCase.isMarketOpen()) {
+            log.debug("Market is closed. Skipping high priority stocks collection.");
+            return;
+        }
         collectHighPriorityStocksReactive().subscribe();
     }
     
@@ -132,10 +144,22 @@ public class StockPriceCollectionScheduler {
     /**
      * 코어 카테고리 종목 수집 (매 분 실행)
      * 
-     * cron 표현식에 따라 실행되며, CORE 카테고리 종목들의 현재가를 수집합니다.
+     * cron 표현식에 따라 실행되며, CORE 카테고리 종목들의 현재가를 수집
+     * 장시간이 아닌 경우 실행하지 않음.
      */
     @Scheduled(cron = "${app.stock-collection.schedule.core-stocks:0 * * * * *}")
     public void collectCoreStocks() {
+        if (!marketHoursUseCase.isMarketOpen()) {
+            // 장마감 시간이면 다음 개장 시간 로깅
+            if (log.isDebugEnabled()) {
+                MarketHoursUseCase.MarketStatus status = marketHoursUseCase.getMarketStatus();
+                log.debug("Market is closed: {}. Next open in {} hours", 
+                    status.description(), 
+                    status.timeUntilNextChange().toHours());
+            }
+            return;
+        }
+        
         log.debug("Starting core stocks collection at {}", LocalDateTime.now());
         
         AtomicInteger count = new AtomicInteger(0);

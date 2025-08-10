@@ -1,9 +1,13 @@
 package me.rgunny.event.unit.application.service;
 
+import me.rgunny.event.marketdata.application.port.out.AlertHistoryPort;
 import me.rgunny.event.marketdata.application.usecase.PriceAlertService;
+import me.rgunny.event.marketdata.domain.model.AlertHistory;
+import me.rgunny.event.marketdata.domain.model.AlertType;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.infrastructure.config.PriceAlertProperties;
 import me.rgunny.event.notification.application.port.out.NotificationClientPort;
+import me.rgunny.event.notification.application.port.out.NotificationHistoryPort;
 import me.rgunny.notification.grpc.NotificationServiceProto.NotificationStatus;
 import me.rgunny.notification.grpc.NotificationServiceProto.PriceAlertType;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,14 +19,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.math.BigDecimal;
+import me.rgunny.event.support.TestClockFactory;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import java.math.BigDecimal;
+import java.time.Clock;
+
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.*;
 
 /**
  * PriceAlertService 단위 테스트
@@ -37,17 +41,39 @@ class PriceAlertServiceTest {
     private NotificationClientPort notificationClient;
     
     @Mock
-    private PriceAlertProperties alertProperties;
+    private NotificationHistoryPort notificationHistoryPort;
     
+    @Mock
+    private AlertHistoryPort alertHistoryPort;
+
     @BeforeEach
     void setUp() {
-        // PriceAlertProperties mock 설정 - lenient로 설정하여 모든 테스트에서 사용할 수 있도록 함
-        lenient().when(alertProperties.getRiseThreshold()).thenReturn(new BigDecimal("5.0"));
-        lenient().when(alertProperties.getFallThreshold()).thenReturn(new BigDecimal("-5.0"));
-        lenient().when(alertProperties.getLimitUpThreshold()).thenReturn(new BigDecimal("29.5"));
-        lenient().when(alertProperties.getLimitDownThreshold()).thenReturn(new BigDecimal("-29.5"));
+        PriceAlertProperties alertProperties = new PriceAlertProperties(
+                new BigDecimal("5.0"),
+                new BigDecimal("-5.0"),
+                new BigDecimal("29.5"),
+                new BigDecimal("-29.5"),
+                30,
+                60
+        );
         
-        priceAlertService = new PriceAlertService(notificationClient, alertProperties);
+        // TestClockFactory 사용
+        Clock fixedClock = TestClockFactory.marketMiddle();
+        
+        // NotificationHistoryPort mock 기본 설정 - 쿨다운 없음
+        lenient().when(notificationHistoryPort.isInCooldown(anyString(), any()))
+                .thenReturn(Mono.just(false));
+        // save 메서드는 저장된 객체를 반환해야 함
+        lenient().when(notificationHistoryPort.save(any()))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        
+        // AlertHistoryPort mock 기본 설정 - 쿨다운 없음
+        lenient().when(alertHistoryPort.canSendAlert(anyString(), any(AlertType.class)))
+                .thenReturn(Mono.just(true));
+        lenient().when(alertHistoryPort.save(any(AlertHistory.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        
+        priceAlertService = new PriceAlertService(notificationClient, notificationHistoryPort, alertHistoryPort, alertProperties, fixedClock);
     }
     
     @Test
@@ -151,10 +177,10 @@ class PriceAlertServiceTest {
                 "삼성전자",
                 currentPrice,
                 previousClose,
-                new BigDecimal("72000"), // 고가
-                new BigDecimal("69000"), // 저가
-                new BigDecimal("70500"), // 시가
-                1500000L, // 거래량
+                new BigDecimal("72000"),
+                new BigDecimal("69000"),
+                new BigDecimal("70500"),
+                1500000L,
                 currentPrice.add(new BigDecimal("100")), // 매도호가1
                 currentPrice.subtract(new BigDecimal("100")) // 매수호가1
         );

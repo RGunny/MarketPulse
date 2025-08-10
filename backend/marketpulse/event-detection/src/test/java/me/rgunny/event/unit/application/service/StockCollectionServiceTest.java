@@ -1,6 +1,7 @@
 package me.rgunny.event.unit.application.service;
 
 import me.rgunny.event.marketdata.application.port.in.GetStockPriceUseCase;
+import me.rgunny.event.marketdata.application.port.in.MarketHoursUseCase;
 import me.rgunny.event.watchlist.application.port.out.WatchTargetPort;
 import me.rgunny.event.marketdata.infrastructure.adapter.in.scheduler.StockPriceCollectionScheduler;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
@@ -19,10 +20,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -38,6 +37,9 @@ class StockPriceCollectionSchedulerTest {
     @Mock
     private me.rgunny.event.marketdata.application.port.in.CollectStockPriceUseCase stockPriceUseCase;
     
+    @Mock
+    private MarketHoursUseCase marketHoursUseCase;
+    
     @Mock 
     private StockCollectionProperties properties;
     
@@ -45,7 +47,7 @@ class StockPriceCollectionSchedulerTest {
     
     @BeforeEach
     void setUp() {
-        stockCollectionService = new StockPriceCollectionScheduler(watchTargetPort, stockPriceUseCase, properties);
+        stockCollectionService = new StockPriceCollectionScheduler(watchTargetPort, stockPriceUseCase, marketHoursUseCase, properties);
     }
     
     @Nested
