@@ -2,7 +2,7 @@ package me.rgunny.event.marketdata.infrastructure.adapter.out.kis;
 
 import me.rgunny.event.marketdata.application.port.out.kis.KISCredentialPort;
 import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
-import me.rgunny.marketpulse.common.security.CryptoService;
+import me.rgunny.marketpulse.common.infrastructure.security.CryptoService;
 import org.springframework.stereotype.Component;
 
 @Component

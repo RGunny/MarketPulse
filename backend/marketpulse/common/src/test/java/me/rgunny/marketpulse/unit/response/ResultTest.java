@@ -1,7 +1,7 @@
 package me.rgunny.marketpulse.unit.response;
 
-import me.rgunny.marketpulse.common.error.CommonErrorCode;
-import me.rgunny.marketpulse.common.response.Result;
+import me.rgunny.marketpulse.common.core.error.CommonErrorCode;
+import me.rgunny.marketpulse.common.core.response.Result;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;

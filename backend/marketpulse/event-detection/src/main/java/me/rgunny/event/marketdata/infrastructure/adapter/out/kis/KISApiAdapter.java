@@ -12,6 +12,7 @@ import me.rgunny.event.marketdata.infrastructure.dto.kis.KISCurrentPriceResponse
 import me.rgunny.event.marketdata.infrastructure.dto.kis.KISCurrentPriceResponseOutput;
 import me.rgunny.event.marketdata.infrastructure.dto.kis.KISTokenRequest;
 import me.rgunny.event.marketdata.infrastructure.dto.kis.KISTokenResponse;
+import me.rgunny.event.marketdata.infrastructure.resilience.KISApiCircuitBreakerService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -31,18 +32,21 @@ public class KISApiAdapter {
     private final KISTokenCachePort tokenCachePort;
     private final StockPort stockPort;
     private final KISApiProperties kisApiProperties;
+    private final KISApiCircuitBreakerService circuitBreakerService;
     
     public KISApiAdapter(@Qualifier("kisWebClient") WebClient webClient,
                          KISCredentialPort credentialPort,
                          KISTokenCachePort tokenCachePort,
                          StockPort stockPort,
-                         KISApiProperties kisApiProperties) {
+                         KISApiProperties kisApiProperties,
+                         KISApiCircuitBreakerService circuitBreakerService) {
         this.webClient = webClient;
         this.credentialPort = credentialPort;
         this.tokenCachePort = tokenCachePort;
         this.stockPort = stockPort;
         this.kisApiProperties = kisApiProperties;
-        log.info("KISApiAdapter initialized with baseUrl: {}", kisApiProperties.baseUrl());
+        this.circuitBreakerService = circuitBreakerService;
+        log.info("KISApiAdapter initialized with baseUrl: {} and Circuit Breaker", kisApiProperties.baseUrl());
     }
     
     // KIS OAuth 토큰 유효시간 (24시간)
@@ -65,7 +69,7 @@ public class KISApiAdapter {
                 request.grant_type(),
                 credentialPort.getMaskedAppKey());
         
-        return webClient.post()
+        Mono<String> apiCall = webClient.post()
                 .uri(kisApiProperties.tokenPath())
                 .header("Content-Type", kisApiProperties.headers().contentType())
                 .bodyValue(request)
@@ -86,16 +90,22 @@ public class KISApiAdapter {
                 .timeout(API_TIMEOUT)
                 .doOnError(error -> log.error("KIS API Token Request Failed", error))
                 .doOnSuccess(token -> log.info("KIS API Token received successfully"));
+        
+        // 서킷브레이커 적용
+        return circuitBreakerService.executeGetAccessToken(apiCall);
     }
 
     public Mono<Boolean> validateConnection() {
-        return getCachedOrNewToken()
+        Mono<Boolean> apiCall = getCachedOrNewToken()
                 .map(token -> token != null && !token.isEmpty())
                 .onErrorReturn(false);
+        
+        // 서킷브레이커 적용
+        return circuitBreakerService.executeValidateConnection(apiCall);
     }
 
     public Mono<StockPrice> getCurrentPrice(String symbol) {
-        return getCachedOrNewToken()
+        Mono<StockPrice> apiCall = getCachedOrNewToken()
                 .flatMap(token -> webClient.get()
                         .uri(kisApiProperties.stockPricePath() + "?fid_cond_mrkt_div_code=J&fid_input_iscd={symbol}", symbol)
                         .header("Content-Type", kisApiProperties.headers().contentType())
@@ -107,6 +117,9 @@ public class KISApiAdapter {
                         .bodyToMono(KISCurrentPriceResponse.class)
                         .flatMap(response -> mapToStockPriceWithName(symbol, response))
                         .timeout(Duration.ofSeconds(kisApiProperties.timeouts().responseTimeoutSeconds())));
+        
+        // 서킷브레이커 적용 (캐시 Fallback 포함)
+        return circuitBreakerService.executeGetCurrentPrice(symbol, apiCall);
     }
 
     private Mono<String> getCachedOrNewToken() {

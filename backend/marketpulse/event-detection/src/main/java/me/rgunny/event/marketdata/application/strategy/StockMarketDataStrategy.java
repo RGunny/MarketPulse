@@ -6,7 +6,7 @@ import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.infrastructure.adapter.out.kis.KISApiAdapter;
 import me.rgunny.event.shared.domain.value.MarketDataType;
 import me.rgunny.event.shared.domain.value.MarketDataValue;
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 

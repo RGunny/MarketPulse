@@ -1,6 +1,6 @@
 package me.rgunny.event.marketdata.domain.exception.kis;
 
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
 import me.rgunny.event.marketdata.domain.error.StockPriceErrorCode;
 
 /**

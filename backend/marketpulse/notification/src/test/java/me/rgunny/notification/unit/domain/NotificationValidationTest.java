@@ -5,7 +5,7 @@ import me.rgunny.notification.domain.model.Notification;
 import me.rgunny.notification.domain.model.NotificationChannel;
 import me.rgunny.notification.domain.model.NotificationStatus;
 import me.rgunny.notification.domain.model.NotificationType;
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

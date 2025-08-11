@@ -1,6 +1,6 @@
 package me.rgunny.event.marketdata.infrastructure.adapter.in.rest;
 
-import me.rgunny.marketpulse.common.response.Result;
+import me.rgunny.marketpulse.common.core.response.Result;
 import me.rgunny.event.marketdata.domain.error.StockPriceErrorCode;
 import me.rgunny.event.marketdata.application.port.in.GetStockPriceUseCase;
 import me.rgunny.event.marketdata.domain.model.StockPrice;

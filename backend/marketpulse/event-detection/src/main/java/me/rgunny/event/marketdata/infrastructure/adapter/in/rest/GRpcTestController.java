@@ -2,7 +2,7 @@ package me.rgunny.event.marketdata.infrastructure.adapter.in.rest;
 
 import me.rgunny.event.marketdata.application.usecase.PriceAlertService;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
-import me.rgunny.marketpulse.common.response.Result;
+import me.rgunny.marketpulse.common.core.response.Result;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;

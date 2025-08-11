@@ -8,7 +8,7 @@ import me.rgunny.notification.domain.event.PriceAlertEvent;
 import me.rgunny.notification.domain.model.Notification;
 import me.rgunny.notification.domain.model.NotificationChannel;
 import me.rgunny.notification.fixture.NotificationTestFixture;
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

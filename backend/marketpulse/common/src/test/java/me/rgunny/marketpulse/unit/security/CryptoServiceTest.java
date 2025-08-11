@@ -1,6 +1,6 @@
 package me.rgunny.marketpulse.unit.security;
 
-import me.rgunny.marketpulse.common.security.CryptoService;
+import me.rgunny.marketpulse.common.infrastructure.security.CryptoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

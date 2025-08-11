@@ -1,7 +1,7 @@
 package me.rgunny.event.marketdata.infrastructure.config;
 
 import me.rgunny.event.marketdata.domain.model.AlertHistory;
-import me.rgunny.marketpulse.common.config.redis.RedisTemplateBuilder;
+import me.rgunny.marketpulse.common.infrastructure.config.redis.RedisTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
