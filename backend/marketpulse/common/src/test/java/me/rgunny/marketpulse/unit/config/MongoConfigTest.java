@@ -1,6 +1,6 @@
 package me.rgunny.marketpulse.unit.config;
 
-import me.rgunny.marketpulse.common.config.MongoConfig;
+import me.rgunny.marketpulse.common.infrastructure.config.mongo.MongoConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;

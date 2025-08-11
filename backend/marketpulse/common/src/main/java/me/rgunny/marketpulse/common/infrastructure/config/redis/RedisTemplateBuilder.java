@@ -1,4 +1,4 @@
-package me.rgunny.marketpulse.common.config.redis;
+package me.rgunny.marketpulse.common.infrastructure.config.redis;
 
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
@@ -12,9 +12,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
  */
 public final class RedisTemplateBuilder {
     
-    private RedisTemplateBuilder() {
-        // 유틸리티 클래스
-    }
+    private RedisTemplateBuilder() {}
     
     /**
      * String-String 타입 ReactiveRedisTemplate 생성

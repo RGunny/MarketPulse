@@ -1,6 +1,6 @@
 package me.rgunny.marketpulse.unit.config;
 
-import me.rgunny.marketpulse.common.config.RedisConfig;
+import me.rgunny.marketpulse.common.infrastructure.config.redis.RedisConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

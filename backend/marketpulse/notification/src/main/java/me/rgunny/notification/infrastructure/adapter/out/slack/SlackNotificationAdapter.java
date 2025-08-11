@@ -7,7 +7,7 @@ import me.rgunny.notification.application.port.out.NotificationSenderPort;
 import me.rgunny.notification.domain.error.NotificationErrorCode;
 import me.rgunny.notification.domain.model.Notification;
 import me.rgunny.notification.domain.model.NotificationChannel;
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

@@ -4,7 +4,7 @@ import me.rgunny.event.marketdata.domain.error.StockPriceErrorCode;
 import me.rgunny.event.marketdata.application.port.in.GetStockPriceUseCase;
 import me.rgunny.event.marketdata.domain.model.StockPrice;
 import me.rgunny.event.marketdata.infrastructure.adapter.in.rest.StockPriceController;
-import me.rgunny.marketpulse.common.response.Result;
+import me.rgunny.marketpulse.common.core.response.Result;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

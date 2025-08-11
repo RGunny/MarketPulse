@@ -3,7 +3,7 @@ package me.rgunny.event.marketdata.domain.model;
 import lombok.Builder;
 import lombok.Getter;
 import me.rgunny.event.marketdata.domain.error.StockErrorCode;
-import me.rgunny.marketpulse.common.util.Validator;
+import me.rgunny.marketpulse.common.core.util.Validator;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;
 import org.springframework.data.mongodb.core.index.CompoundIndex;

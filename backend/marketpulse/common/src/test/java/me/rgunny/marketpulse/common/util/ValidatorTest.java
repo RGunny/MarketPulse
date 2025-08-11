@@ -1,7 +1,8 @@
 package me.rgunny.marketpulse.common.util;
 
-import me.rgunny.marketpulse.common.error.ErrorCode;
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.error.ErrorCode;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.util.Validator;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

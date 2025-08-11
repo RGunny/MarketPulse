@@ -1,6 +1,6 @@
 package me.rgunny.event.marketdata.domain.error;
 
-import me.rgunny.marketpulse.common.error.ErrorCode;
+import me.rgunny.marketpulse.common.core.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public enum StockPriceErrorCode implements ErrorCode {

@@ -1,4 +1,4 @@
-package me.rgunny.marketpulse.common.config.redis;
+package me.rgunny.marketpulse.common.infrastructure.config.redis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;

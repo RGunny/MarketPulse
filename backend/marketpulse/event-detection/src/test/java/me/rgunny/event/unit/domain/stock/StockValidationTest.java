@@ -3,7 +3,7 @@ package me.rgunny.event.unit.domain.stock;
 import me.rgunny.event.marketdata.domain.error.StockErrorCode;
 import me.rgunny.event.marketdata.domain.model.MarketType;
 import me.rgunny.event.marketdata.domain.model.Stock;
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

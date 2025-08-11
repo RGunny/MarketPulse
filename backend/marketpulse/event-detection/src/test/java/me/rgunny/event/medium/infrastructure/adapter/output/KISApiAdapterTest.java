@@ -6,6 +6,7 @@ import me.rgunny.event.marketdata.application.port.out.shared.StockPort;
 import me.rgunny.event.marketdata.domain.exception.kis.KisApiException;
 import me.rgunny.event.marketdata.infrastructure.adapter.out.kis.KISApiAdapter;
 import me.rgunny.event.marketdata.infrastructure.config.kis.KISApiProperties;
+import me.rgunny.event.marketdata.infrastructure.resilience.KISApiCircuitBreakerService;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -21,8 +22,7 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
@@ -36,6 +36,7 @@ class KISApiAdapterTest {
     @Mock private KISTokenCachePort tokenCachePort;
     @Mock private StockPort stockPort;
     @Mock private KISApiProperties kisApiProperties;
+    @Mock private KISApiCircuitBreakerService circuitBreakerService;
     
     private static final String TEST_APP_KEY = "test-app-key";
     private static final String TEST_APP_SECRET = "test-app-secret";
@@ -56,8 +57,16 @@ class KISApiAdapterTest {
                 .baseUrl(baseUrl)
                 .build();
         
+        // CircuitBreaker 모킹 설정 (테스트에서는 passthrough)
+        given(circuitBreakerService.executeGetAccessToken(any()))
+                .willAnswer(invocation -> invocation.getArgument(0));
+        given(circuitBreakerService.executeGetCurrentPrice(anyString(), any()))
+                .willAnswer(invocation -> invocation.getArgument(1));
+        given(circuitBreakerService.executeValidateConnection(any()))
+                .willAnswer(invocation -> invocation.getArgument(0));
+        
         // Adapter 생성
-        kisApiAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, stockPort, kisApiProperties);
+        kisApiAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, stockPort, kisApiProperties, circuitBreakerService);
     }
 
     @AfterEach
@@ -156,7 +165,7 @@ class KISApiAdapterTest {
                     .build();
             
             // 테스트용 짧은 타임아웃을 가진 adapter 생성
-            KISApiAdapter testAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, stockPort, kisApiProperties) {
+            KISApiAdapter testAdapter = new KISApiAdapter(webClient, credentialPort, tokenCachePort, stockPort, kisApiProperties, circuitBreakerService) {
                 @Override
                 public Mono<String> getAccessToken() {
                     // 테스트를 위해 50ms 타임아웃 적용

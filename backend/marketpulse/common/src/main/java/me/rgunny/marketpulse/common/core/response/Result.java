@@ -1,6 +1,6 @@
-package me.rgunny.marketpulse.common.response;
+package me.rgunny.marketpulse.common.core.response;
 
-import me.rgunny.marketpulse.common.error.ErrorCode;
+import me.rgunny.marketpulse.common.core.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 /**

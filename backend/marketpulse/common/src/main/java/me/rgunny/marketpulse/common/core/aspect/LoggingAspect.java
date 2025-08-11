@@ -1,4 +1,4 @@
-package me.rgunny.marketpulse.common.aspect;
+package me.rgunny.marketpulse.common.core.aspect;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;

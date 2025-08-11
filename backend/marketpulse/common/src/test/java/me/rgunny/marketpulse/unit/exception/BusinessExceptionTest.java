@@ -1,7 +1,7 @@
 package me.rgunny.marketpulse.unit.exception;
 
-import me.rgunny.marketpulse.common.error.CommonErrorCode;
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.error.CommonErrorCode;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

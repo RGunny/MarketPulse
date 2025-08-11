@@ -2,7 +2,7 @@ package me.rgunny.notification.application.usecase;
 
 import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
 import me.rgunny.notification.application.port.in.SendNotificationUseCase;
 import me.rgunny.notification.application.port.out.NotificationMetricsPort;
 import me.rgunny.notification.application.port.out.NotificationSenderPort;

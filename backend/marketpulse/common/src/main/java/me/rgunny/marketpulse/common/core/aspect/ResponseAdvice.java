@@ -1,6 +1,6 @@
-package me.rgunny.marketpulse.common.aspect;
+package me.rgunny.marketpulse.common.core.aspect;
 
-import me.rgunny.marketpulse.common.response.Result;
+import me.rgunny.marketpulse.common.core.response.Result;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;

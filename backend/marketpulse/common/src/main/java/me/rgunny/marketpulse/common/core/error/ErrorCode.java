@@ -1,4 +1,4 @@
-package me.rgunny.marketpulse.common.error;
+package me.rgunny.marketpulse.common.core.error;
 
 import org.springframework.http.HttpStatus;
 

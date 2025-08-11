@@ -1,6 +1,6 @@
-package me.rgunny.marketpulse.common.config;
+package me.rgunny.marketpulse.common.infrastructure.config.redis;
 
-import me.rgunny.marketpulse.common.config.redis.RedisTemplateBuilder;
+import me.rgunny.marketpulse.common.infrastructure.config.redis.RedisTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;

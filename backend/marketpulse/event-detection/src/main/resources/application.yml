@@ -85,6 +85,38 @@ event-detection:
   scheduler:
     interval: 30s               # 30초마다 감지
 
+# Resilience4j Circuit Breaker 설정
+resilience4j:
+  circuitbreaker:
+    enabled: true
+    failure-rate-threshold: 30                    # 30% 실패율에서 Open  
+    slow-call-rate-threshold: 50                  # 50% 느린 호출에서 Open
+    slow-call-duration-threshold: 10s             # 10초 이상이면 느린 호출  
+    permitted-number-of-calls-in-half-open-state: 5
+    sliding-window-size: 50
+    sliding-window-type: COUNT_BASED
+    minimum-number-of-calls: 5
+    wait-duration-in-open-state: 30s              # Open 상태 30초 유지 (빠른 복구)
+    automatic-transition-from-open-to-half-open-enabled: true  # 자동 전환 활성화
+    record-exceptions: true
+    register-health-indicator: true
+
+# Actuator 설정 (Circuit Breaker 모니터링)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  metrics:
+    tags:
+      application: event-detection
+
 # gRPC 클라이언트 설정
 grpc:
   client:

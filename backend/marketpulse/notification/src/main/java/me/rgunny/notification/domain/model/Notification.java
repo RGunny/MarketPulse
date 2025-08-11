@@ -1,6 +1,6 @@
 package me.rgunny.notification.domain.model;
 
-import me.rgunny.marketpulse.common.exception.BusinessException;
+import me.rgunny.marketpulse.common.core.exception.BusinessException;
 import me.rgunny.notification.domain.error.NotificationErrorCode;
 
 import java.time.LocalDateTime;

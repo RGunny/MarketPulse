@@ -1,6 +1,6 @@
 package me.rgunny.marketpulse.unit.error;
 
-import me.rgunny.marketpulse.common.error.CommonErrorCode;
+import me.rgunny.marketpulse.common.core.error.CommonErrorCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

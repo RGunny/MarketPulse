@@ -1,6 +1,6 @@
-package me.rgunny.marketpulse.common.exception;
+package me.rgunny.marketpulse.common.core.exception;
 
-import me.rgunny.marketpulse.common.error.ErrorCode;
+import me.rgunny.marketpulse.common.core.error.ErrorCode;
 
 public class BusinessException extends RuntimeException {
 

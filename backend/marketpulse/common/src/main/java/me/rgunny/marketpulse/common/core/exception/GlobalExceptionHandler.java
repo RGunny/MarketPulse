@@ -1,8 +1,8 @@
-package me.rgunny.marketpulse.common.exception;
+package me.rgunny.marketpulse.common.core.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import me.rgunny.marketpulse.common.error.CommonErrorCode;
-import me.rgunny.marketpulse.common.response.Result;
+import me.rgunny.marketpulse.common.core.error.CommonErrorCode;
+import me.rgunny.marketpulse.common.core.response.Result;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

@@ -1,4 +1,4 @@
-package me.rgunny.marketpulse.common.security;
+package me.rgunny.marketpulse.common.infrastructure.security;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
