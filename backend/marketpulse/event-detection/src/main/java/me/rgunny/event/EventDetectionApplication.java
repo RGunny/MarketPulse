@@ -21,12 +21,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication(exclude = {
         DataSourceAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class
-},
-        //TODO: common 모듈 AutoConfiguration으로 리팩토링
-        scanBasePackages = {
-                "me.rgunny.event",
-                "me.rgunny.marketpulse.common"
-        })
+})
 public class EventDetectionApplication {
 
     public static void main(String[] args) {

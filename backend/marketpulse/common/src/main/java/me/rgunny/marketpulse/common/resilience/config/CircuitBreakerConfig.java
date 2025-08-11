@@ -5,6 +5,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import io.github.resilience4j.micrometer.tagged.TaggedCircuitBreakerMetrics;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -30,8 +31,10 @@ public class CircuitBreakerConfig {
      * 서킷브레이커 레지스트리 빈 등록
      * 
      * 모든 서킷브레이커 인스턴스 중앙 관리
+     * @ConditionalOnMissingBean으로 Resilience4j AutoConfiguration과 중복 방지
      */
     @Bean
+    @ConditionalOnMissingBean(CircuitBreakerRegistry.class)
     public CircuitBreakerRegistry circuitBreakerRegistry(CircuitBreakerProperties properties) {
         var config = io.github.resilience4j.circuitbreaker.CircuitBreakerConfig.custom()
                 .failureRateThreshold(properties.failureRateThreshold())
