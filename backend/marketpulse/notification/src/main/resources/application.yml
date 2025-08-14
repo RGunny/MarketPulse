@@ -6,26 +6,34 @@ spring:
   application:
     name: notification-service
     version: 1.0.0
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+    include: common  # 공통 설정 포함
 
 # gRPC Configuration  
 grpc:
   server:
     port: 9082
 
-# Notification Configuration
+# Default Notification Configuration
 notification:
   slack:
-    webhook-url: ${SLACK_WEBHOOK_URL:}
+    webhook-url: ${SLACK_WEBHOOK_URL:https://hooks.slack.com/services/test}
   default:
-    recipient: "market-alerts"
+    recipient: ${NOTIFICATION_DEFAULT_RECIPIENT:market-alerts}
 
 # Logging
 logging:
   level:
-    me.rgunny.notification: DEBUG
+    me.rgunny.marketpulse.notification: DEBUG
     io.grpc: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Encryption placeholder
+app:
+  encryption:
+    algorithm: AES/GCM/NoPadding
 
 # Management
 management:

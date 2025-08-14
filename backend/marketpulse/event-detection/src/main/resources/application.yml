@@ -35,10 +35,18 @@ market-data:
     
     # API 경로 설정
     stock-price-transaction-id: FHKST01010100
+    stock-master-transaction-id: CTPF1702R
     grant-type: client_credentials
     token-path: /oauth2/tokenP
     stock-price-path: /uapi/domestic-stock/v1/quotations/inquire-price
+    stock-master-path: /uapi/domestic-stock/v1/quotations/search-info
     health-path: /oauth2/tokenP
+    
+    # 시장별 상품 코드
+    market-product-codes:
+      kospi: "300"
+      kosdaq: "301"
+      konex: "302"
     
     # 헤더 설정
     headers:
@@ -74,6 +82,24 @@ marketpulse:
       fall-threshold: -5.0        # 급락 알림 임계값 (%)
       limit-up-threshold: 29.5    # 상한가 알림 임계값 (%)
       limit-down-threshold: -29.5 # 하한가 알림 임계값 (%)
+  
+  # 종목 마스터 동기화 설정
+  stock-master:
+    sync:
+      enabled: false                      # 동기화 활성화 (운영 환경에서 true)
+      mode: INCREMENTAL                   # 기본 동기화 모드
+      full-sync-cron: "0 0 2 * * *"      # 전체 동기화: 매일 새벽 2시
+      incremental-sync-cron: "0 0 * * * *" # 증분 동기화: 매시간
+      kospi-sync-cron: "0 0 3 * * *"     # KOSPI 동기화: 매일 새벽 3시
+      kosdaq-sync-cron: "0 30 3 * * *"   # KOSDAQ 동기화: 매일 새벽 3시 30분
+      batch-size: 100                    # 배치 처리 크기
+      batch-delay-ms: 100                # 배치 간 지연 (밀리초)
+      api-timeout-seconds: 30            # API 타임아웃
+      max-retry-attempts: 3              # 최대 재시도 횟수
+      kospi-sync-enabled: false          # KOSPI 개별 동기화
+      kosdaq-sync-enabled: false         # KOSDAQ 개별 동기화
+      failure-threshold: 10.0            # 실패 임계값 (%)
+      notification-enabled: true         # 결과 알림
 
 # 이벤트 감지 설정 (Legacy - 향후 제거 예정)
 event-detection:
@@ -127,7 +153,7 @@ grpc:
 # 로깅 설정
 logging:
   level:
-    me.rgunny.event: DEBUG
+    me.rgunny.marketpulse.event: DEBUG
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
@@ -140,7 +166,7 @@ spring:
 
 logging:
   level:
-    me.rgunny.event: INFO
+    me.rgunny.marketpulse.event: INFO
 
 ---
 # 운영 환경

@@ -1,0 +1,62 @@
+# MarketPulse 공통 설정
+# 모든 모듈에서 상속받아 사용하는 기본 설정
+
+# Redis 공통 설정
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+    
+    # MongoDB 공통 설정
+    mongodb:
+      uri: mongodb://${MONGO_USERNAME:marketpulse_user}:${MONGO_PASSWORD:marketpulse_pass}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DATABASE:marketpulse}?authSource=${MONGO_DATABASE:marketpulse}
+      auto-index-creation: true
+
+# 암호화 공통 설정
+app:
+  encryption:
+    master-key: ${MASTER_ENCRYPTION_KEY:a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456}
+    algorithm: AES/GCM/NoPadding
+
+# Actuator 공통 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# Circuit Breaker 공통 설정
+resilience:
+  circuit-breaker:
+    failure-rate-threshold: 30
+    slow-call-rate-threshold: 50
+    slow-call-duration-threshold: 10000
+    permitted-number-of-calls-in-half-open-state: 5
+    sliding-window-size: 20
+    minimum-number-of-calls: 5
+    wait-duration-in-open-state: 30000
+    automatic-transition-from-open-to-half-open-enabled: true
+
+# 로깅 공통 설정
+logging:
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n"
+  file:
+    name: logs/${spring.application.name}.log
+    max-size: 10MB
+    max-history: 30

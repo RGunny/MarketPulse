@@ -11,7 +11,7 @@ import java.time.Duration;
  * - 실시간 모니터링 지원
  * - 동적 설정 변경 가능
  */
-@ConfigurationProperties(prefix = "resilience4j.circuitbreaker")
+@ConfigurationProperties(prefix = "resilience.circuit-breaker")
 public record CircuitBreakerProperties(
         Integer failureRateThreshold,           // 실패율 임계치 (기본 50%)
         Integer slowCallRateThreshold,          // 느린 호출 비율 임계치 (기본 100%)
