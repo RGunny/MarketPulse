@@ -1,10 +1,10 @@
-package me.rgunny.event.marketdata.infrastructure.adapter.in.web;
+package me.rgunny.marketpulse.event.marketdata.infrastructure.adapter.in.web;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.rgunny.marketpulse.common.core.response.Result;
-import me.rgunny.event.marketdata.domain.error.StockPriceErrorCode;
-import me.rgunny.event.marketdata.infrastructure.resilience.KISApiCircuitBreakerService;
+import me.rgunny.marketpulse.event.marketdata.domain.error.StockPriceErrorCode;
+import me.rgunny.marketpulse.event.marketdata.infrastructure.resilience.KISApiCircuitBreakerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
