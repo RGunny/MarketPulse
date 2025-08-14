@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package notification;
 
-option java_package = "me.rgunny.notification.grpc";
+option java_package = "me.rgunny.marketpulse.notification.grpc";
 option java_outer_classname = "NotificationServiceProto";
 
 // 알림 서비스 정의
