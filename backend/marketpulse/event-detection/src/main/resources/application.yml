@@ -21,21 +21,33 @@ spring:
       host: ${MONGO_HOST:localhost}
       port: ${MONGO_PORT:27017}
       username: ${MONGO_USERNAME:marketpulse_user}
-      password: ${MONGO_PASSWORD:ENC(Zbbd9f16LRZi1rL1IIuJNN+tPqNiYAFnIzn54zUwU1CBRhXM1bzUmpFYvQU=)}
+      password: ${MONGO_PASSWORD:ENC(8MvgE7NHkAi8yf4QDw8KEXTb4hApJHyZW2eqAKlMY6+D0amgZhwk6Cn1xSqZYncxMi4o1miHtVy+tgSvMvs4eA==)}
       database: ${MONGO_DATABASE:marketpulse}
 
-# 암호화 설정
+# Jasypt 암호화 설정
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:MySecretKey2024!@#$}  # 환경변수로 관리 권장
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    key-obtention-iterations: 1000
+    pool-size: 1
+    provider-name: SunJCE
+    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+    string-output-type: base64
+
+# 암호화 설정 (CryptoService용)
 app:
   encryption:
-    master-key: ${MASTER_ENCRYPTION_KEY:a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456}
+    master-key: ${MASTER_ENCRYPTION_KEY:7b6c5d4e3f2a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c}
 
 
 market-data:
   kis: ## 한국투자증권
     enabled: true
     base-url: https://openapi.koreainvestment.com:9443
-    app-key: ENC(bAI2B9y4YYc7jKZEOhk8cmZxG2RqXjfNIKzThRR8M7w88ZDEJ1cOYsGlzjuSRUhfV9fle4sV858+lVdj6oJcwg==)
-    app-secret: ENC(GkUPL4rT6hAAJGHeQpgjEcPaDCw1CD3zL2e5WJkyHmXkXxFO045WND+k07AFNhw9rLfQezBlsOnISWIcnCqlIb9C/ycg2bT1Gkok2UH5HxfrDMD+B7zcMD7s9JC4AiIqMV33zmvUcMjNtmlFiWRcJkZj+XI9zMAQvmPP4pIvuj866LRA0qOh0NGcGZZC8NJyfiJ9e4KVfxzaFQ4s2e/zQQq4cKbxYMkBptiCgTtuOOockGe92lz1QUiepulTSwwEnVhc+z2dxiezojqsGcfDtg==)
+    app-key: ${KIS_APP_KEY:ENC(pU5IZBfB5CZcFAhhcuhqRPYvYqk/7SVpCfdAQkYtkRCr7kV1RahlbsDCEncreBczjA91yICdT12WrDOlSrQupzx7XABA51ntMlTpdH9p4bw=)}
+    app-secret: ${KIS_APP_SECRET:ENC(192tqbeXcS+DnSrUJGSme+ze0kUMneRIFM4u9i3aqj8zgsKqFNop41sfR0ujbNT8e++XXae8P0zi2lfzfGYBZumkgitCohra5rTsHPFigs/ZN2v9jo/L1+uf2XWTXqimPTiVlkSjChjgKcFN4eqAyUfyc/O1vytl1cj+dfxuFNaMC9FuHEx6oEhSJBTaLruJ25KZhAlR0nT7Me2H4t2/8z2Jf6a3afcsjraAQn0CHdvVdDn3BPRr5s0nsoYllvi/)}
     
     # API 경로 설정
     stock-price-transaction-id: FHKST01010100
@@ -116,8 +128,8 @@ event-detection:
     interval: 30s               # 30초마다 감지
 
 # Resilience4j Circuit Breaker 설정
-resilience4j:
-  circuitbreaker:
+resilience:
+  circuit-breaker:
     enabled: true
     failure-rate-threshold: 30                    # 30% 실패율에서 Open  
     slow-call-rate-threshold: 50                  # 50% 느린 호출에서 Open

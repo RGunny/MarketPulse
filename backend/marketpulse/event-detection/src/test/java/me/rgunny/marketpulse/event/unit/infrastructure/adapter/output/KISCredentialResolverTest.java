@@ -3,7 +3,6 @@ package me.rgunny.marketpulse.event.unit.infrastructure.adapter.output;
 import me.rgunny.marketpulse.event.marketdata.application.port.out.kis.KISCredentialPort;
 import me.rgunny.marketpulse.event.marketdata.infrastructure.adapter.out.kis.KISCredentialResolverImpl;
 import me.rgunny.marketpulse.event.marketdata.infrastructure.config.kis.KISApiProperties;
-import me.rgunny.marketpulse.common.infrastructure.security.CryptoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,14 +20,11 @@ class KISCredentialResolverTest {
     @Mock
     private KISApiProperties properties;
     
-    @Mock
-    private CryptoService cryptoService;
-    
     private KISCredentialPort credentialPort;
 
     @BeforeEach
     void setUp() {
-        credentialPort = new KISCredentialResolverImpl(properties, cryptoService);
+        credentialPort = new KISCredentialResolverImpl(properties);
     }
 
     @Test
@@ -59,52 +55,44 @@ class KISCredentialResolverTest {
     }
 
     @Test
-    @DisplayName("복호화된 App Key를 반환한다")
+    @DisplayName("App Key를 반환한다 (Jasypt가 자동 복호화)")
     void shouldReturnDecryptedAppKey() {
         // given
-        String encryptedKey = "encrypted-app-key";
-        String decryptedKey = "decrypted-app-key";
-        given(properties.appKey()).willReturn(encryptedKey);
-        given(cryptoService.decrypt(encryptedKey)).willReturn(decryptedKey);
+        String appKeyValue = "decrypted-app-key";
+        given(properties.appKey()).willReturn(appKeyValue);
 
         // when
         String appKey = credentialPort.getDecryptedAppKey();
 
         // then
-        assertThat(appKey).isEqualTo(decryptedKey);
+        assertThat(appKey).isEqualTo(appKeyValue);
     }
 
     @Test
-    @DisplayName("복호화된 App Secret을 반환한다")
+    @DisplayName("App Secret을 반환한다 (Jasypt가 자동 복호화)")
     void shouldReturnDecryptedAppSecret() {
         // given
-        String encryptedSecret = "encrypted-app-secret";
-        String decryptedSecret = "decrypted-app-secret";
-        given(properties.appSecret()).willReturn(encryptedSecret);
-        given(cryptoService.decrypt(encryptedSecret)).willReturn(decryptedSecret);
+        String appSecretValue = "decrypted-app-secret";
+        given(properties.appSecret()).willReturn(appSecretValue);
 
         // when
         String appSecret = credentialPort.getDecryptedAppSecret();
 
         // then
-        assertThat(appSecret).isEqualTo(decryptedSecret);
+        assertThat(appSecret).isEqualTo(appSecretValue);
     }
 
     @Test
     @DisplayName("마스킹된 App Key를 반환한다")
     void shouldReturnMaskedAppKey() {
         // given
-        String encryptedKey = "encrypted-app-key";
-        String decryptedKey = "decrypted-app-key";
-        String maskedKey = "dec****-key";
-        given(properties.appKey()).willReturn(encryptedKey);
-        given(cryptoService.decrypt(encryptedKey)).willReturn(decryptedKey);
-        given(cryptoService.maskSensitiveValue(decryptedKey)).willReturn(maskedKey);
+        String appKeyValue = "decrypted-app-key";
+        given(properties.appKey()).willReturn(appKeyValue);
 
         // when
-        String appKey = credentialPort.getMaskedAppKey();
+        String maskedKey = credentialPort.getMaskedAppKey();
 
         // then
-        assertThat(appKey).isEqualTo(maskedKey);
+        assertThat(maskedKey).isEqualTo("decr***-key");
     }
 }
