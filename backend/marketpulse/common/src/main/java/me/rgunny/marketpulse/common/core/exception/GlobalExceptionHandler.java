@@ -18,6 +18,11 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 
+/**
+ * TODO:
+ *   1. extends ResponseEntityExceptionHandler
+ *   2. use ProblemDetail (RFC 9457)
+ */
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
