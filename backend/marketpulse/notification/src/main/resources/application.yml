@@ -8,7 +8,14 @@ spring:
     version: 1.0.0
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
-    include: common  # 공통 설정 포함
+
+  # Redis 설정
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000ms
 
 # gRPC Configuration  
 grpc:
@@ -30,10 +37,35 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
-# Encryption placeholder
-app:
-  encryption:
-    algorithm: AES/GCM/NoPadding
+# Jasypt 암호화 설정
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:RGunnySecretKey2025!@#}
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    key-obtention-iterations: 1000
+    pool-size: 1
+    provider-name: SunJCE
+    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+    string-output-type: base64
+
+# Circuit Breaker Configuration
+resilience:
+  circuit-breaker:
+    failure-rate-threshold: 30
+    slow-call-rate-threshold: 50
+    slow-call-duration-threshold: 2000
+    wait-duration-in-open-state: 30000
+    permitted-number-of-calls-in-half-open-state: 10
+    sliding-window-size: 100
+    sliding-window-type: COUNT_BASED
+    minimum-number-of-calls: 10
+    automatic-transition-from-open-to-half-open-enabled: true
+    record-exceptions:
+      - java.io.IOException
+      - java.util.concurrent.TimeoutException
+    ignore-exceptions:
+      - java.lang.IllegalArgumentException
 
 # Management
 management:

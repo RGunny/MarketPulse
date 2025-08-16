@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
  * Jasypt 암호화 유틸리티
  * 
  * 프로퍼티 값을 암호화/복호화하는 유틸리티 제공
- * 기존 CryptoService를 대체하여 Jasypt 표준 방식 사용
  * 
  * 사용법:
  * 1. 암호화: JasyptEncryptionUtil.encrypt("평문")
@@ -42,6 +41,7 @@ public class JasyptEncryptionUtil {
         config.setStringOutputType("base64");
         
         encryptor.setConfig(config);
+
         return encryptor;
     }
     
@@ -63,6 +63,7 @@ public class JasyptEncryptionUtil {
         config.setStringOutputType("base64");
         
         encryptor.setConfig(config);
+
         return encryptor.encrypt(plainText);
     }
     
@@ -84,34 +85,8 @@ public class JasyptEncryptionUtil {
         config.setStringOutputType("base64");
         
         encryptor.setConfig(config);
+
         return encryptor.decrypt(encryptedText);
     }
-    
-    /**
-     * 테스트용 main 메서드 - 값 암호화 생성
-     */
-    public static void main(String[] args) {
-        String password = "MySecretKey2024!@#$";
-        
-        // MongoDB 비밀번호 암호화
-        String mongoPassword = "marketpulse_pass";
-        String encryptedMongo = encrypt(mongoPassword, password);
-        System.out.println("MongoDB Password:");
-        System.out.println("  Original: " + mongoPassword);
-        System.out.println("  Encrypted: ENC(" + encryptedMongo + ")");
-        
-        // KIS API Key 암호화 (예시)
-        String kisAppKey = "PSRagIHmAapGSRYoQMpfXVb1DqL0gUJ96mBl";
-        String encryptedKisKey = encrypt(kisAppKey, password);
-        System.out.println("\nKIS App Key:");
-        System.out.println("  Original: " + kisAppKey);
-        System.out.println("  Encrypted: ENC(" + encryptedKisKey + ")");
-        
-        // KIS API Secret 암호화 (예시)
-        String kisAppSecret = "q7fFFXY2ag4g/3Cp0+n4t4n7qPVRFBu7jmYhQQrLPJP7OF0OVeUFEH2yxRHYsVqUmFbrxP6NT0Qe8+rdqeps1lNB1n8lPNhS9vp0NSl5QHJqWCuJmL8KDEzsGpUNJnByRliFvTXz8qhLF8KOzaiL/iXoMw==";
-        String encryptedKisSecret = encrypt(kisAppSecret, password);
-        System.out.println("\nKIS App Secret:");
-        System.out.println("  Original: " + kisAppSecret);
-        System.out.println("  Encrypted: ENC(" + encryptedKisSecret + ")");
-    }
+
 }

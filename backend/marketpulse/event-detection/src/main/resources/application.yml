@@ -21,13 +21,13 @@ spring:
       host: ${MONGO_HOST:localhost}
       port: ${MONGO_PORT:27017}
       username: ${MONGO_USERNAME:marketpulse_user}
-      password: ${MONGO_PASSWORD:ENC(8MvgE7NHkAi8yf4QDw8KEXTb4hApJHyZW2eqAKlMY6+D0amgZhwk6Cn1xSqZYncxMi4o1miHtVy+tgSvMvs4eA==)}
+      password: ${MONGO_PASSWORD:ENC(2IsMMkngNZxntzhLMNDJRy+TtrfzXxX8s8LyuCA1Q9ORvCw2p+q2hbOgrTnJPifnksL9WpnCoAqI6wuJUHbFJg==)}
       database: ${MONGO_DATABASE:marketpulse}
 
 # Jasypt 암호화 설정
 jasypt:
   encryptor:
-    password: ${JASYPT_ENCRYPTOR_PASSWORD:MySecretKey2024!@#$}  # 환경변수로 관리 권장
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:RGunnySecretKey2025!@#}
     algorithm: PBEWITHHMACSHA512ANDAES_256
     key-obtention-iterations: 1000
     pool-size: 1
@@ -46,8 +46,8 @@ market-data:
   kis: ## 한국투자증권
     enabled: true
     base-url: https://openapi.koreainvestment.com:9443
-    app-key: ${KIS_APP_KEY:ENC(pU5IZBfB5CZcFAhhcuhqRPYvYqk/7SVpCfdAQkYtkRCr7kV1RahlbsDCEncreBczjA91yICdT12WrDOlSrQupzx7XABA51ntMlTpdH9p4bw=)}
-    app-secret: ${KIS_APP_SECRET:ENC(192tqbeXcS+DnSrUJGSme+ze0kUMneRIFM4u9i3aqj8zgsKqFNop41sfR0ujbNT8e++XXae8P0zi2lfzfGYBZumkgitCohra5rTsHPFigs/ZN2v9jo/L1+uf2XWTXqimPTiVlkSjChjgKcFN4eqAyUfyc/O1vytl1cj+dfxuFNaMC9FuHEx6oEhSJBTaLruJ25KZhAlR0nT7Me2H4t2/8z2Jf6a3afcsjraAQn0CHdvVdDn3BPRr5s0nsoYllvi/)}
+    app-key: ${KIS_APP_KEY:ENC(7EqZ9Egni4PWW66duuwbe7kLu05QmxalIxJw+UX9MkS5XH7q28cFZOyHmVuBm8IO0ilXgly9G3px4CRZ+3lgscEgaV9BF5qEBwFXpMej7kw=)}
+    app-secret: ${KIS_APP_SECRET:ENC(Qh1nvFGTzpjBTxMCgJaaPEWn0ONWEDYpnrxU8g9KoBFqcFJ53sQVUQ6219nh+K4j1SEch7bCSaHlKFxFtqadsj0WF+Wpk661XhuGEbU39lASR/f10WuDqwrHJImzPn1xl5dstTo0pYJIrZT/PbW7WPH6AVTykbUC2wuQ92lU7yArQ7TfXAfulhtw8OY7noAXznJjrNlWDLCx8RGzAuHJJz01N7qZQPzpAZoVv1LQnBhLoZdZApC4hnym+zluzrrb)}
     
     # API 경로 설정
     stock-price-transaction-id: FHKST01010100

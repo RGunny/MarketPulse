@@ -3,6 +3,12 @@ spring:
   application:
     name: notification-service-test
 
+# Jasypt 암호화 설정 (테스트용)
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:RGunnyTestKey2025!@#}
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+
 # Test Notification Configuration
 notification:
   slack:

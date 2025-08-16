@@ -19,7 +19,7 @@ spring:
 # Jasypt 암호화 설정 (테스트용)
 jasypt:
   encryptor:
-    password: ${JASYPT_ENCRYPTOR_PASSWORD:TestSecretKey2024!@#$}
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:RGunnyTestKey2025!@#}
     algorithm: PBEWITHHMACSHA512ANDAES_256
 
 # KIS API 테스트 설정
