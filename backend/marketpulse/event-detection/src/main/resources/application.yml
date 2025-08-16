@@ -17,8 +17,12 @@ spring:
     
     # MongoDB 설정
     mongodb:
-      uri: mongodb://${MONGO_USERNAME:marketpulse_user}:${MONGO_PASSWORD:marketpulse_pass}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DATABASE:marketpulse}?authSource=${MONGO_DATABASE:marketpulse}
       auto-index-creation: true
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      username: ${MONGO_USERNAME:marketpulse_user}
+      password: ${MONGO_PASSWORD:ENC(Zbbd9f16LRZi1rL1IIuJNN+tPqNiYAFnIzn54zUwU1CBRhXM1bzUmpFYvQU=)}
+      database: ${MONGO_DATABASE:marketpulse}
 
 # 암호화 설정
 app:
