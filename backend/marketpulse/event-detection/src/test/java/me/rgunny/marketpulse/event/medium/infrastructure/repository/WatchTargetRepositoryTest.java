@@ -1,24 +1,24 @@
 package me.rgunny.marketpulse.event.medium.infrastructure.repository;
 
+import me.rgunny.marketpulse.event.support.MongoTestcontainersTest;
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchCategory;
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchTarget;
 import me.rgunny.marketpulse.event.watchlist.infrastructure.adapter.out.persistence.WatchTargetRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.test.StepVerifier;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.time.Duration;
 
-@DataMongoTest
-@ActiveProfiles("test")
-@Testcontainers
-@DisplayName("WatchTargetRepository - MongoDB 연동 (medium)")
-class WatchTargetRepositoryTest {
+/**
+ * WatchTargetRepository Testcontainers 테스트
+ */
+@DisplayName("WatchTargetRepository - Testcontainers")
+@DisabledIfEnvironmentVariable(named = "USE_TESTCONTAINERS", matches = "false")
+class WatchTargetRepositoryTest extends MongoTestcontainersTest {
 
     @Autowired
     private WatchTargetRepository watchTargetRepository;

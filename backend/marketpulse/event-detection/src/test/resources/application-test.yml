@@ -1,37 +1,55 @@
+# ========================================
+# Event-Detection Test Configuration
+# ========================================
+
 spring:
+  config:
+    import: classpath:application-test.yml  # Common 테스트 설정 import
+  
+  # Local MongoDB 설정 (Testcontainers 비활성화 시 사용)
   data:
-    # MongoDB 테스트 설정 - Testcontainers 사용 시 동적 설정됨
-    # 로컬 MongoDB 사용 시 아래 설정 사용
     mongodb:
-      auto-index-creation: true
       host: ${MONGO_HOST:localhost}
       port: ${MONGO_PORT:27017}
-      database: ${MONGO_DATABASE:marketpulse}
       username: ${MONGO_USERNAME:marketpulse_user}
-      password: ${MONGO_PASSWORD:marketpulse_password}
-      # Testcontainers 사용 시 위 설정은 무시되고 동적으로 설정됨
-      
-    # Redis 테스트 설정
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      password: ${MONGO_PASSWORD:marketpulse_password}  # 테스트용 평문
+      database: ${MONGO_DATABASE:marketpulse}
+      auto-index-creation: true
 
-# Jasypt 암호화 설정 (테스트용)
-jasypt:
-  encryptor:
-    password: ${JASYPT_ENCRYPTOR_PASSWORD:RGunnyTestKey2025!@#}
-    algorithm: PBEWITHHMACSHA512ANDAES_256
+# 테스트 실행 모드 설정
+test:
+  containers:
+    enabled: ${USE_TESTCONTAINERS:true}  # 기본값: true (Testcontainers 사용)
 
-# KIS API 테스트 설정
+# KIS API 테스트 설정 (MockWebServer 사용)
 market-data:
   kis:
     enabled: true
     base-url: http://localhost:8080  # MockWebServer URL
     app-key: test-app-key
     app-secret: test-app-secret
+    
+# MarketPulse 테스트 설정
+marketpulse:
+  alert:
+    price:
+      rise-threshold: 5.0
+      fall-threshold: -5.0
+      limit-up-threshold: 29.5
+      limit-down-threshold: -29.5
+  
+  stock-master:
+    sync:
+      enabled: false  # 테스트에서는 비활성화
 
-# 로깅 설정
+# gRPC 테스트 설정
+grpc:
+  client:
+    notification:
+      address: 'static://localhost:9999'
+      negotiationType: plaintext
+
+# 로깅 레벨 (테스트용)
 logging:
   level:
-    me.rgunny.event: DEBUG
-    org.springframework.data.mongodb: DEBUG
+    me.rgunny.marketpulse.event: DEBUG
