@@ -1,78 +1,28 @@
+# ========================================
 # Notification Service Configuration
-server:
-  port: 8082
+# ========================================
 
 spring:
   application:
-    name: notification-service
-    version: 1.0.0
+    name: notification
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}
+    active: ${SPRING_PROFILES_ACTIVE:local}  # 기본값: local
+  config:
+    import: classpath:application-common.yml  # Common 인프라 설정 import
 
-  # Redis 설정
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      timeout: 3000ms
+server:
+  port: 8082
 
-# gRPC Configuration  
+# ===== gRPC Server 설정 =====
 grpc:
   server:
     port: 9082
 
-# Default Notification Configuration
+# ===== 알림 채널 설정 =====
 notification:
   slack:
     webhook-url: ${SLACK_WEBHOOK_URL:https://hooks.slack.com/services/test}
+  
+  # 기본 수신자 설정
   default:
     recipient: ${NOTIFICATION_DEFAULT_RECIPIENT:market-alerts}
-
-# Logging
-logging:
-  level:
-    me.rgunny.marketpulse.notification: DEBUG
-    io.grpc: INFO
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-
-# Jasypt 암호화 설정
-jasypt:
-  encryptor:
-    password: ${JASYPT_ENCRYPTOR_PASSWORD:RGunnySecretKey2025!@#}
-    algorithm: PBEWITHHMACSHA512ANDAES_256
-    key-obtention-iterations: 1000
-    pool-size: 1
-    provider-name: SunJCE
-    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
-    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
-    string-output-type: base64
-
-# Circuit Breaker Configuration
-resilience:
-  circuit-breaker:
-    failure-rate-threshold: 30
-    slow-call-rate-threshold: 50
-    slow-call-duration-threshold: 2000
-    wait-duration-in-open-state: 30000
-    permitted-number-of-calls-in-half-open-state: 10
-    sliding-window-size: 100
-    sliding-window-type: COUNT_BASED
-    minimum-number-of-calls: 10
-    automatic-transition-from-open-to-half-open-enabled: true
-    record-exceptions:
-      - java.io.IOException
-      - java.util.concurrent.TimeoutException
-    ignore-exceptions:
-      - java.lang.IllegalArgumentException
-
-# Management
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  endpoint:
-    health:
-      show-details: always

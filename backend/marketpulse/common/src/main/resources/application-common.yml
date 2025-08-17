@@ -1,9 +1,12 @@
-# MarketPulse 공통 설정
-# 모든 모듈에서 상속받아 사용하는 기본 설정
+# ========================================
+# Common Infrastructure Configuration
+# 모든 모듈에서 공통으로 사용하는 인프라 설정
+# ========================================
 
-# Redis 공통 설정
+# ===== 데이터 저장소 =====
 spring:
   data:
+    # Redis 공통 설정
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
@@ -20,47 +23,67 @@ spring:
       host: ${MONGO_HOST:localhost}
       port: ${MONGO_PORT:27017}
       username: ${MONGO_USERNAME:marketpulse_user}
-      password: ${MONGO_PASSWORD:ENC(Zbbd9f16LRZi1rL1IIuJNN+tPqNiYAFnIzn54zUwU1CBRhXM1bzUmpFYvQU=)}
+      password: ${MONGO_PASSWORD:ENC(2IsMMkngNZxntzhLMNDJRy+TtrfzXxX8s8LyuCA1Q9ORvCw2p+q2hbOgrTnJPifnksL9WpnCoAqI6wuJUHbFJg==)}
       database: ${MONGO_DATABASE:marketpulse}
       auto-index-creation: true
 
-# 암호화 공통 설정
+# ===== Jasypt 암호화 =====
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:RGunnySecretKey2025!@#}
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    key-obtention-iterations: 1000
+    pool-size: 1
+    provider-name: SunJCE
+    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+    string-output-type: base64
+
+# ===== 보안 (CryptoService용 - Legacy) =====
 app:
   encryption:
-    master-key: ${MASTER_ENCRYPTION_KEY:a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456}
+    master-key: ${MASTER_ENCRYPTION_KEY:7b6c5d4e3f2a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c}
     algorithm: AES/GCM/NoPadding
 
-# Actuator 공통 설정
+# ===== 모니터링 =====
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,circuitbreakers,circuitbreakerevents
   endpoint:
     health:
       show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
   metrics:
     tags:
       application: ${spring.application.name}
 
-# Circuit Breaker 공통 설정
+# ===== Circuit Breaker =====
 resilience:
   circuit-breaker:
     failure-rate-threshold: 30
     slow-call-rate-threshold: 50
-    slow-call-duration-threshold: 10000
+    slow-call-duration-threshold: 10s
     permitted-number-of-calls-in-half-open-state: 5
-    sliding-window-size: 20
+    sliding-window-size: 50
+    sliding-window-type: COUNT_BASED
     minimum-number-of-calls: 5
-    wait-duration-in-open-state: 30000
+    wait-duration-in-open-state: 30s
     automatic-transition-from-open-to-half-open-enabled: true
+    record-exceptions: true
+    register-health-indicator: true
 
-# 로깅 공통 설정
+# ===== 로깅 =====
 logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n"
   file:
     name: logs/${spring.application.name}.log
-    max-size: 10MB
-    max-history: 30
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
