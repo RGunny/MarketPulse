@@ -82,6 +82,14 @@ public record KISApiProperties(
 ) {
     
     public KISApiProperties {
+        // baseUrl 검증 (필수값)
+        if (baseUrl == null || baseUrl.isBlank()) {
+            throw new IllegalArgumentException("KIS API baseUrl is required but was null or empty");
+        }
+        if (!baseUrl.startsWith("http")) {
+            throw new IllegalArgumentException("KIS API baseUrl must start with http or https, but was: " + baseUrl);
+        }
+        
         // 기본값 설정
         if (stockPriceTransactionId == null || stockPriceTransactionId.isBlank()) {
             stockPriceTransactionId = "FHKST01010100";

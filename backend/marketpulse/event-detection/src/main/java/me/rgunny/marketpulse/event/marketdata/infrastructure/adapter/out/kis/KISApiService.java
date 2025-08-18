@@ -29,16 +29,33 @@ import static me.rgunny.marketpulse.event.marketdata.infrastructure.util.KISFiel
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class KISApiService {
     
-    @Qualifier("kisWebClient")
     private final WebClient webClient;
     private final KISCredentialPort credentialPort;
     private final KISTokenPort tokenPort;
     private final StockPort stockPort;
     private final KISApiProperties kisApiProperties;
     private final KISApiCircuitBreakerService circuitBreakerService;
+    
+    public KISApiService(
+            @Qualifier("kisWebClient") WebClient kisWebClient,
+            KISCredentialPort credentialPort,
+            KISTokenPort tokenPort,
+            StockPort stockPort,
+            KISApiProperties kisApiProperties,
+            KISApiCircuitBreakerService circuitBreakerService) {
+        this.webClient = kisWebClient;
+        this.credentialPort = credentialPort;
+        this.tokenPort = tokenPort;
+        this.stockPort = stockPort;
+        this.kisApiProperties = kisApiProperties;
+        this.circuitBreakerService = circuitBreakerService;
+        
+        log.info("##### KISApiService Constructor #####");
+        log.info("WebClient class: {}", kisWebClient.getClass().getName());
+        log.info("####################################");
+    }
     
     // API 호출 타임아웃 (10초)
     private static final Duration API_TIMEOUT = Duration.ofSeconds(10);
@@ -61,8 +78,11 @@ public class KISApiService {
         
         Mono<StockPrice> apiCall = tokenPort.getAccessToken()
                 .flatMap(token -> webClient.get()
-                        .uri(kisApiProperties.stockPricePath() + 
-                             "?fid_cond_mrkt_div_code=J&fid_input_iscd={symbol}", symbol)
+                        .uri(uriBuilder -> uriBuilder
+                                .path(kisApiProperties.stockPricePath())
+                                .queryParam("fid_cond_mrkt_div_code", "J")
+                                .queryParam("fid_input_iscd", symbol)
+                                .build())
                         .header("Content-Type", kisApiProperties.headers().contentType())
                         .header("authorization", "Bearer " + token)
                         .header("appkey", credentialPort.getDecryptedAppKey())
