@@ -46,7 +46,7 @@ marketpulse:
 grpc:
   client:
     notification:
-      address: 'static://localhost:9999'
+      address: 'static://localhost:9082'
       negotiationType: plaintext
 
 # 로깅 레벨 (테스트용)
