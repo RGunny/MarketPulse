@@ -56,10 +56,28 @@ marketpulse:
   # 알림 임계값
   alert:
     price:
-      rise-threshold: 5.0         # 급등 알림 임계값 (%)
-      fall-threshold: -5.0        # 급락 알림 임계값 (%)
+      rise-threshold: 0.5         # 급등 알림 임계값 (%)
+      fall-threshold: -0.5        # 급락 알림 임계값 (%)
       limit-up-threshold: 29.5    # 상한가 알림 임계값 (%)
       limit-down-threshold: -29.5 # 하한가 알림 임계값 (%)
+  
+  # 시장 순위 수집 설정
+  market-ranking:
+    enabled: true                        # 순위 수집 활성화
+    auto-watch:
+      enabled: true                      # 자동 WatchTarget 등록 활성화
+      price-rise-limit: 10               # 상승률 상위 N위까지 자동 등록
+      price-fall-limit: 10               # 하락률 상위 N위까지 자동 등록
+      volume-surge-limit: 5              # 거래량 상위 N위까지 자동 등록
+      priority: 2                        # 자동 등록 종목 우선순위
+      collect-interval-seconds: 60       # 수집 주기 (초)
+    schedule:
+      kospi-cron: "0 */10 9-15 * * MON-FRI"    # KOSPI 순위 수집 (10분마다)
+      kosdaq-cron: "0 5-55/10 9-15 * * MON-FRI" # KOSDAQ 순위 수집 (10분마다)
+      anomaly-cron: "0 */5 9-15 * * MON-FRI"    # 이상 종목 감지 (5분마다)
+      morning-cron: "0 1 9 * * MON-FRI"         # 장 시작 초기 수집
+      cleanup-cron: "0 0 3 * * *"               # 오래된 데이터 정리
+    retention-days: 7                           # 데이터 보관 기간 (일)
   
   # 종목 마스터 동기화 설정
   stock-master:
