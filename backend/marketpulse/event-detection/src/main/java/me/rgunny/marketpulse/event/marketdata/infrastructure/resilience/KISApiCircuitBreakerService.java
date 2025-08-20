@@ -43,21 +43,27 @@ public class KISApiCircuitBreakerService {
     public void init() {
         // KIS API 전용 서킷브레이커 설정
         var config = CircuitBreakerConfig.custom()
-                .failureRateThreshold(30)                      // 30% 실패율에서 Open
-                .slowCallRateThreshold(50)                     // 50% 느린 호출에서 Open
-                .slowCallDurationThreshold(Duration.ofSeconds(10))  // 10초 이상이면 느린 호출
-                .permittedNumberOfCallsInHalfOpenState(5)      // Half-Open에서 5개 테스트
-                .slidingWindowSize(20)                         // 최근 20개 호출 기준
+                .failureRateThreshold(40)                           // 40% 실패율에서 Open
+                .slowCallRateThreshold(60)                          // 60% 느린 호출에서 Open
+                .slowCallDurationThreshold(Duration.ofSeconds(8))   // 8초 이상이면 느린 호출
+                .permittedNumberOfCallsInHalfOpenState(10)          // Half-Open에서 10개 테스트
+                .slidingWindowSize(50)                              // 최근 50개 호출 기준
                 .slidingWindowType(CircuitBreakerConfig.SlidingWindowType.COUNT_BASED)
-                .minimumNumberOfCalls(5)                       // 최소 5개 호출 후 평가
-                .waitDurationInOpenState(Duration.ofSeconds(30))    // Open 상태 30초 유지
+                .minimumNumberOfCalls(10)                           // 최소 10개 호출 후 평가
+                .waitDurationInOpenState(Duration.ofSeconds(20))    // Open 상태 20초 유지
                 .automaticTransitionFromOpenToHalfOpenEnabled(true) // 자동 복구 시도
-                .recordExceptions(                             // 기록할 예외 지정
+                .recordExceptions(                                  // 기록할 예외 지정
                         io.netty.channel.ConnectTimeoutException.class,
                         java.net.SocketTimeoutException.class,
+                        java.net.SocketException.class,
+                        java.io.IOException.class,
                         java.util.concurrent.TimeoutException.class,
                         org.springframework.web.reactive.function.client.WebClientRequestException.class,
                         org.springframework.web.reactive.function.client.WebClientResponseException.class
+                )
+                .ignoreExceptions(
+                        IllegalArgumentException.class,
+                        IllegalStateException.class
                 )
                 .build();
         
@@ -210,24 +216,24 @@ public class KISApiCircuitBreakerService {
                     
                     // Slack 알림 등 추가 액션 가능
                     if (transition.getToState() == CircuitBreaker.State.OPEN) {
-                        log.error("⚠️ ALERT: KIS API Circuit Breaker is now OPEN! API calls will be blocked.");
+                        log.error("ALERT: KIS API Circuit Breaker is now OPEN! API calls will be blocked.");
                     } else if (transition.getToState() == CircuitBreaker.State.CLOSED) {
-                        log.info("✅ KIS API Circuit Breaker recovered and is now CLOSED.");
+                        log.info("KIS API Circuit Breaker recovered and is now CLOSED.");
                     }
                 })
                 .onFailureRateExceeded(event -> 
-                    log.error("📈 Failure rate exceeded: {}% for {}", 
+                    log.error("Failure rate exceeded: {}% for {}",
                             event.getFailureRate(), CIRCUIT_BREAKER_NAME))
                 .onSlowCallRateExceeded(event ->
-                    log.warn("🐌 Slow call rate exceeded: {}% for {}",
+                    log.warn("Slow call rate exceeded: {}% for {}",
                             event.getSlowCallRate(), CIRCUIT_BREAKER_NAME))
                 .onCallNotPermitted(event ->
-                    log.debug("🚫 Call not permitted for {}", CIRCUIT_BREAKER_NAME))
+                    log.debug("Call not permitted for {}", CIRCUIT_BREAKER_NAME))
                 .onError(event ->
-                    log.debug("❌ Error recorded: {} for {}", 
+                    log.debug("Error recorded: {} for {}",
                             event.getThrowable().getMessage(), CIRCUIT_BREAKER_NAME))
                 .onSuccess(event ->
-                    log.trace("✓ Successful call for {}", CIRCUIT_BREAKER_NAME));
+                    log.trace("Successful call for {}", CIRCUIT_BREAKER_NAME));
     }
     
     /**

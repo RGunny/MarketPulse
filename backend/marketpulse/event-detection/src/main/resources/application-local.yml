@@ -15,3 +15,7 @@ marketpulse:
   stock-master:
     sync:
       enabled: true
+  # 앱 시작시 알림 이력 자동 초기화
+  alert:
+    cleanup:
+      enabled: true
