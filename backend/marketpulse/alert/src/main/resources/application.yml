@@ -1,13 +1,17 @@
 spring:
   application:
     name: alert
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/alert_db
-    redis:
-      host: localhost
-      port: 6379
-      database: 1
+  main:
+    web-application-type: servlet
+  datasource:
+    url: jdbc:mysql://localhost:3306/alert_db
+    username: alert_user
+    password: alert_password
+  jpa:
+    hibernate:
+#      ddl-auto: update
+      ddl-auto: create-drop
+    show-sql: true
 
 server:
   port: 8083

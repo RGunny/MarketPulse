@@ -5,8 +5,7 @@ dependencies {
     api("org.springframework.boot:spring-boot-starter-validation")
     api("org.springframework.boot:spring-boot-starter-aop")
     api ("org.springframework.boot:spring-boot-starter-web")
-    api ("org.springframework.boot:spring-boot-starter-data-jpa")
-    
+
     // WebFlux (MSA 기본 - Reactive)
     api("org.springframework.boot:spring-boot-starter-webflux")
     
