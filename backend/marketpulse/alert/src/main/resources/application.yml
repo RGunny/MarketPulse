@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: alert
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/alert_db
+    redis:
+      host: localhost
+      port: 6379
+      database: 1
+
+server:
+  port: 8083
+
+logging:
+  level:
+    me.rgunny.marketpulse.alert: DEBUG
+
+# CryptoService 비활성화 (alert 모듈에서는 암호화 미사용)
+app:
+  encryption:
+    enabled: false
