@@ -1,4 +1,4 @@
-package me.rgunny.marketpulse.event.watchlist.infrastructure.adapter.out.persistence;
+package me.rgunny.marketpulse.event.watchlist.adapter.out.persistence;
 
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchCategory;
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchTarget;

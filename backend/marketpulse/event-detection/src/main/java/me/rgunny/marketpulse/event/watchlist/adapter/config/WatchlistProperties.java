@@ -1,4 +1,4 @@
-package me.rgunny.marketpulse.event.watchlist.infrastructure.config;
+package me.rgunny.marketpulse.event.watchlist.adapter.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

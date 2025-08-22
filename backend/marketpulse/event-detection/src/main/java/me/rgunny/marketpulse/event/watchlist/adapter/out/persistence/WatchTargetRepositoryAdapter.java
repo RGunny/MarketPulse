@@ -1,11 +1,11 @@
-package me.rgunny.marketpulse.event.watchlist.infrastructure.adapter.out.persistence;
+package me.rgunny.marketpulse.event.watchlist.adapter.out.persistence;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.rgunny.marketpulse.event.watchlist.application.port.out.WatchTargetPort;
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchCategory;
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchTarget;
-import me.rgunny.marketpulse.event.watchlist.infrastructure.config.WatchlistProperties;
+import me.rgunny.marketpulse.event.watchlist.adapter.config.WatchlistProperties;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
