@@ -2,6 +2,7 @@ package me.rgunny.marketpulse.common.infrastructure.security;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
@@ -13,6 +14,12 @@ import java.util.Arrays;
 import java.util.Base64;
 
 @Service
+@ConditionalOnProperty(
+    prefix = "app.encryption",
+    name = "enabled",
+    havingValue = "true",
+    matchIfMissing = false  // 설정이 없으면 Bean 생성 안 함
+)
 public class CryptoService {
 
     // AES-256-GCM: 현재 가장 안전하고 빠른 대칭 암호화
