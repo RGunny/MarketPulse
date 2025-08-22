@@ -1,0 +1,12 @@
+# ========================================
+# Notification Service - Production Profile
+# ========================================
+
+# 로깅 레벨 (운영 환경에서 INFO)
+logging:
+  level:
+    me.rgunny.marketpulse.notification: INFO
+    me.rgunny.marketpulse.common: INFO
+    io.grpc: INFO
+    org.springframework: INFO
+

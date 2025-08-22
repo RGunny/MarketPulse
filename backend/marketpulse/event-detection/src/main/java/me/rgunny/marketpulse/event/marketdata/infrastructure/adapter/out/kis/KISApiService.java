@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 
 import static me.rgunny.marketpulse.event.marketdata.infrastructure.util.KISFieldParser.toBigDecimal;
@@ -29,16 +30,36 @@ import static me.rgunny.marketpulse.event.marketdata.infrastructure.util.KISFiel
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class KISApiService {
     
-    @Qualifier("kisWebClient")
     private final WebClient webClient;
     private final KISCredentialPort credentialPort;
     private final KISTokenPort tokenPort;
     private final StockPort stockPort;
     private final KISApiProperties kisApiProperties;
     private final KISApiCircuitBreakerService circuitBreakerService;
+    private final KISApiRetryService retryService;
+    
+    public KISApiService(
+            @Qualifier("kisWebClient") WebClient kisWebClient,
+            KISCredentialPort credentialPort,
+            KISTokenPort tokenPort,
+            StockPort stockPort,
+            KISApiProperties kisApiProperties,
+            KISApiCircuitBreakerService circuitBreakerService,
+            KISApiRetryService retryService) {
+        this.webClient = kisWebClient;
+        this.credentialPort = credentialPort;
+        this.tokenPort = tokenPort;
+        this.stockPort = stockPort;
+        this.kisApiProperties = kisApiProperties;
+        this.circuitBreakerService = circuitBreakerService;
+        this.retryService = retryService;
+        
+        log.info("##### KISApiService Constructor #####");
+        log.info("WebClient class: {}", kisWebClient.getClass().getName());
+        log.info("####################################");
+    }
     
     // API 호출 타임아웃 (10초)
     private static final Duration API_TIMEOUT = Duration.ofSeconds(10);
@@ -61,8 +82,11 @@ public class KISApiService {
         
         Mono<StockPrice> apiCall = tokenPort.getAccessToken()
                 .flatMap(token -> webClient.get()
-                        .uri(kisApiProperties.stockPricePath() + 
-                             "?fid_cond_mrkt_div_code=J&fid_input_iscd={symbol}", symbol)
+                        .uri(uriBuilder -> uriBuilder
+                                .path(kisApiProperties.stockPricePath())
+                                .queryParam("fid_cond_mrkt_div_code", "J")
+                                .queryParam("fid_input_iscd", symbol)
+                                .build())
                         .header("Content-Type", kisApiProperties.headers().contentType())
                         .header("authorization", "Bearer " + token)
                         .header("appkey", credentialPort.getDecryptedAppKey())
@@ -75,8 +99,14 @@ public class KISApiService {
                         .timeout(Duration.ofSeconds(
                                 kisApiProperties.timeouts().responseTimeoutSeconds())));
         
+        // 재시도 로직
+        Mono<StockPrice> apiCallWithRetry = retryService.withRetry(
+                apiCall, 
+                String.format("getCurrentPrice(%s)", symbol)
+        );
+        
         // 서킷브레이커 적용
-        return circuitBreakerService.executeGetCurrentPrice(symbol, apiCall);
+        return circuitBreakerService.executeGetCurrentPrice(symbol, apiCallWithRetry);
     }
     
     
@@ -90,6 +120,9 @@ public class KISApiService {
         }
 
         KISCurrentPriceResponseOutput output = response.output();
+
+        log.debug("KIS API Response for {}: currentPrice={}, basePrice={}, change={}", 
+                symbol, output.stck_prpr(), output.stck_sdpr(), output.prdy_vrss());
         
         // Stock 엔티티에서 종목명 조회
         return stockPort.findBySymbol(symbol)
@@ -100,7 +133,7 @@ public class KISApiService {
                             symbol,
                             name,
                             toBigDecimal(output.stck_prpr()),           // 현재가
-                            toBigDecimal(output.stck_prdy_clpr()),      // 전일종가
+                            toBigDecimal(output.stck_sdpr()),           // 기준가 (전일종가)
                             toBigDecimal(output.stck_hgpr()),           // 고가
                             toBigDecimal(output.stck_lwpr()),           // 저가
                             toBigDecimal(output.stck_oprc()),           // 시가

@@ -26,15 +26,26 @@ import java.time.Duration;
  */
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class KISTokenService implements KISTokenPort {
     
-    @Qualifier("kisWebClient")
     private final WebClient webClient;
     private final KISCredentialPort credentialPort;
     private final KISTokenCachePort tokenCachePort;
     private final KISApiProperties kisApiProperties;
     private final KISApiCircuitBreakerService circuitBreakerService;
+    
+    public KISTokenService(
+            @Qualifier("kisWebClient") WebClient kisWebClient,
+            KISCredentialPort credentialPort,
+            KISTokenCachePort tokenCachePort,
+            KISApiProperties kisApiProperties,
+            KISApiCircuitBreakerService circuitBreakerService) {
+        this.webClient = kisWebClient;
+        this.credentialPort = credentialPort;
+        this.tokenCachePort = tokenCachePort;
+        this.kisApiProperties = kisApiProperties;
+        this.circuitBreakerService = circuitBreakerService;
+    }
     
     // KIS OAuth 토큰 유효시간 (24시간)
     private static final Duration TOKEN_TTL = Duration.ofHours(24);
@@ -81,9 +92,13 @@ public class KISTokenService implements KISTokenPort {
         );
 
         log.debug("Requesting KIS API Token");
+        log.debug("Token API Path: {}", kisApiProperties.tokenPath());
+        log.debug("Base URL from properties: {}", kisApiProperties.baseUrl());
         
         Mono<String> apiCall = webClient.post()
-                .uri(kisApiProperties.tokenPath())
+                .uri(uriBuilder -> uriBuilder
+                        .path(kisApiProperties.tokenPath())
+                        .build())
                 .header("Content-Type", kisApiProperties.headers().contentType())
                 .bodyValue(request)
                 .retrieve()

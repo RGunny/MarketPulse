@@ -1,5 +1,6 @@
 package me.rgunny.marketpulse.common;
 
+import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -13,11 +14,13 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
  * - 표준 응답 및 에러코드 (core.response, core.error)
  * - Resilience4j 서킷브레이커 (resilience)
  * - 보안 서비스 (infrastructure.security)
+ * - Jasypt 프로퍼티 암호화 자동 처리
  * 
  * 참고: MongoDB/Redis 설정은 각 모듈별로 개별 설정하여 중복을 방지함
  */
 @AutoConfiguration
 @EnableAspectJAutoProxy
+@EnableEncryptableProperties  // Jasypt 활성화 - ENC() 형식 자동 복호화
 @ComponentScan(basePackages = {
     "me.rgunny.marketpulse.common.core",
     "me.rgunny.marketpulse.common.resilience",
