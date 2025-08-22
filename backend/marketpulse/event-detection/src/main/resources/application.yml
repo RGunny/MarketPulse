@@ -17,12 +17,13 @@ spring:
     
     # MongoDB 설정
     mongodb:
-      uri: mongodb://${MONGO_USERNAME:marketpulse_user}:${MONGO_PASSWORD:marketpulse_pass}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DATABASE:marketpulse}?authSource=${MONGO_DATABASE:marketpulse}
+      uri: mongodb://${MONGO_USERNAME:marketpulse_user}:${MONGO_PASSWORD:marketpulse_password}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DATABASE:marketpulse}?authSource=${MONGO_DATABASE:marketpulse}
       auto-index-creation: true
 
 # 암호화 설정
 app:
   encryption:
+    enabled: true  # CryptoService Bean 활성화
     master-key: ${MASTER_ENCRYPTION_KEY:a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456}
 
 
@@ -112,9 +113,8 @@ event-detection:
     interval: 30s               # 30초마다 감지
 
 # Resilience4j Circuit Breaker 설정
-resilience4j:
-  circuitbreaker:
-    enabled: true
+resilience:
+  circuit-breaker:
     failure-rate-threshold: 30                    # 30% 실패율에서 Open  
     slow-call-rate-threshold: 50                  # 50% 느린 호출에서 Open
     slow-call-duration-threshold: 10s             # 10초 이상이면 느린 호출  
