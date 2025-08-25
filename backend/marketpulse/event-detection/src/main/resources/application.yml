@@ -1,4 +1,10 @@
+# ========================================
+# Event Detection Service Configuration
+# ========================================
+
 spring:
+  application:
+    name: event-detection
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
     
@@ -26,13 +32,16 @@ app:
     enabled: true  # CryptoService Bean 활성화
     master-key: ${MASTER_ENCRYPTION_KEY:a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456}
 
+server:
+  port: 8081
 
+# ===== KIS API 설정 =====
 market-data:
-  kis: ## 한국투자증권
+  kis:
     enabled: true
     base-url: https://openapi.koreainvestment.com:9443
-    app-key: ENC(bAI2B9y4YYc7jKZEOhk8cmZxG2RqXjfNIKzThRR8M7w88ZDEJ1cOYsGlzjuSRUhfV9fle4sV858+lVdj6oJcwg==)
-    app-secret: ENC(GkUPL4rT6hAAJGHeQpgjEcPaDCw1CD3zL2e5WJkyHmXkXxFO045WND+k07AFNhw9rLfQezBlsOnISWIcnCqlIb9C/ycg2bT1Gkok2UH5HxfrDMD+B7zcMD7s9JC4AiIqMV33zmvUcMjNtmlFiWRcJkZj+XI9zMAQvmPP4pIvuj866LRA0qOh0NGcGZZC8NJyfiJ9e4KVfxzaFQ4s2e/zQQq4cKbxYMkBptiCgTtuOOockGe92lz1QUiepulTSwwEnVhc+z2dxiezojqsGcfDtg==)
+    app-key: ${KIS_APP_KEY:PSJl1bIxRyo5KfRppyzDkgOvC7bnH11aNvpJ}
+    app-secret: ${KIS_APP_SECRET:JVhukuuD873hc1Lq8uRXmpYBvLJTyFg6xi+LZD0J6Htaqq+dMBaqdD1yoLdsAAXSFsCKQd9da+LjkPPh4M+sxsQmk5az2TzBfysA8hsfGgB6Fz7gFsyychqP4bkZihRTF7gERsY1QFeHTXEpxpFOUhunQGtyxDIBOoRx2Z/gIzWwbKmWJvU=}
     
     # API 경로 설정
     stock-price-transaction-id: FHKST01010100
@@ -64,30 +73,38 @@ market-data:
       write-timeout-seconds: 30
       response-timeout-seconds: 60
 
-  alpha-vantage:
-    enabled: false
-    base-url: https://www.alphavantage.co/query
-    api-key: ${ALPHA_VANTAGE_API_KEY}
-
-  bok: ## Bank of Korea
-    enabled: false
-    base-url: https://ecos.bok.or.kr
-    api-key: ${BOK_API_KEY}
-
-
-# MarketPulse 알림 설정
+# ===== MarketPulse 비즈니스 설정 =====
 marketpulse:
+  # 알림 임계값
   alert:
     price:
-      rise-threshold: 5.0         # 급등 알림 임계값 (%)
-      fall-threshold: -5.0        # 급락 알림 임계값 (%)
+      rise-threshold: 0.5         # 급등 알림 임계값 (%)
+      fall-threshold: -0.5        # 급락 알림 임계값 (%)
       limit-up-threshold: 29.5    # 상한가 알림 임계값 (%)
       limit-down-threshold: -29.5 # 하한가 알림 임계값 (%)
+  
+  # 시장 순위 수집 설정
+  market-ranking:
+    enabled: true                        # 순위 수집 활성화
+    auto-watch:
+      enabled: true                      # 자동 WatchTarget 등록 활성화
+      price-rise-limit: 10               # 상승률 상위 N위까지 자동 등록
+      price-fall-limit: 10               # 하락률 상위 N위까지 자동 등록
+      volume-surge-limit: 5              # 거래량 상위 N위까지 자동 등록
+      priority: 2                        # 자동 등록 종목 우선순위
+      collect-interval-seconds: 60       # 수집 주기 (초)
+    schedule:
+      kospi-cron: "0 */10 9-15 * * MON-FRI"    # KOSPI 순위 수집 (10분마다)
+      kosdaq-cron: "0 5-55/10 9-15 * * MON-FRI" # KOSDAQ 순위 수집 (10분마다)
+      anomaly-cron: "0 */5 9-15 * * MON-FRI"    # 이상 종목 감지 (5분마다)
+      morning-cron: "0 1 9 * * MON-FRI"         # 장 시작 초기 수집
+      cleanup-cron: "0 0 3 * * *"               # 오래된 데이터 정리
+    retention-days: 7                           # 데이터 보관 기간 (일)
   
   # 종목 마스터 동기화 설정
   stock-master:
     sync:
-      enabled: false                      # 동기화 활성화 (운영 환경에서 true)
+      enabled: false                      # 동기화 활성화
       mode: INCREMENTAL                   # 기본 동기화 모드
       full-sync-cron: "0 0 2 * * *"      # 전체 동기화: 매일 새벽 2시
       incremental-sync-cron: "0 0 * * * *" # 증분 동기화: 매시간
@@ -149,28 +166,3 @@ grpc:
     notification:
       address: 'static://localhost:9082'
       negotiationType: plaintext
-
-# 로깅 설정
-logging:
-  level:
-    me.rgunny.marketpulse.event: DEBUG
-  pattern:
-    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-
----
-# 로컬 개발 환경
-spring:
-  config:
-    activate:
-      on-profile: local
-
-logging:
-  level:
-    me.rgunny.marketpulse.event: INFO
-
----
-# 운영 환경
-spring:
-  config:
-    activate:
-      on-profile: prod

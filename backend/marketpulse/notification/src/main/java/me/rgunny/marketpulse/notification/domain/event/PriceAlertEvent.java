@@ -1,6 +1,7 @@
 package me.rgunny.marketpulse.notification.domain.event;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -24,7 +25,7 @@ public record PriceAlertEvent(
      */
     public String getChangeRateString() {
         String sign = changeRate.compareTo(BigDecimal.ZERO) > 0 ? "+" : "";
-        return sign + changeRate.multiply(BigDecimal.valueOf(100)).setScale(2) + "%";
+        return sign + changeRate.setScale(2, RoundingMode.HALF_UP) + "%";
     }
     
     /**

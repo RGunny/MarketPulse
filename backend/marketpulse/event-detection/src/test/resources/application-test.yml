@@ -1,29 +1,55 @@
+# ========================================
+# Event-Detection Test Configuration
+# ========================================
+
 spring:
+  config:
+    import: classpath:application-test.yml  # Common 테스트 설정 import
+  
+  # Local MongoDB 설정 (Testcontainers 비활성화 시 사용)
   data:
-    # MongoDB 테스트 설정 (TestContainers가 동적으로 설정)
     mongodb:
+      host: ${MONGO_HOST:localhost}
+      port: ${MONGO_PORT:27017}
+      username: ${MONGO_USERNAME:marketpulse_user}
+      password: ${MONGO_PASSWORD:marketpulse_password}  # 테스트용 평문
+      database: ${MONGO_DATABASE:marketpulse}
       auto-index-creation: true
-      
-    # Redis 테스트 설정
-    redis:
-      host: localhost
-      port: 6379
 
-# 암호화 설정
-app:
-  encryption:
-    master-key: a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+# 테스트 실행 모드 설정
+test:
+  containers:
+    enabled: ${USE_TESTCONTAINERS:true}  # 기본값: true (Testcontainers 사용)
 
-# KIS API 테스트 설정
+# KIS API 테스트 설정 (MockWebServer 사용)
 market-data:
   kis:
     enabled: true
     base-url: http://localhost:8080  # MockWebServer URL
     app-key: test-app-key
     app-secret: test-app-secret
+    
+# MarketPulse 테스트 설정
+marketpulse:
+  alert:
+    price:
+      rise-threshold: 5.0
+      fall-threshold: -5.0
+      limit-up-threshold: 29.5
+      limit-down-threshold: -29.5
+  
+  stock-master:
+    sync:
+      enabled: false  # 테스트에서는 비활성화
 
-# 로깅 설정
+# gRPC 테스트 설정
+grpc:
+  client:
+    notification:
+      address: 'static://localhost:9082'
+      negotiationType: plaintext
+
+# 로깅 레벨 (테스트용)
 logging:
   level:
-    me.rgunny.event: DEBUG
-    org.springframework.data.mongodb: DEBUG
+    me.rgunny.marketpulse.event: DEBUG

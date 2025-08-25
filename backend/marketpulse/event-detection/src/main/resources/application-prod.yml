@@ -1,0 +1,18 @@
+# ========================================
+# Event Detection - Production Profile
+# ========================================
+
+# 로깅 레벨
+logging:
+  level:
+    me.rgunny.marketpulse.event: INFO
+    me.rgunny.marketpulse.common: INFO
+    io.grpc: INFO
+    org.springframework: INFO
+
+# 운영 환경용 종목 마스터 동기화 활성화
+marketpulse:
+  stock-master:
+    sync:
+      enabled: true
+      notification-enabled: true

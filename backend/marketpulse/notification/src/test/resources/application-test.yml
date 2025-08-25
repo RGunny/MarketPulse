@@ -1,17 +1,27 @@
-# Test Configuration
+# ========================================
+# Notification Test Configuration
+# ========================================
+
 spring:
   application:
-    name: notification-service-test
+    name: notification-test
+  config:
+    import: classpath:application-test.yml  # Common 테스트 설정 import
 
-# Test Notification Configuration
+# gRPC 서버 테스트 설정
+grpc:
+  server:
+    port: 9999  # 테스트용 포트
+
+# 알림 테스트 설정
 notification:
   slack:
-    webhook-url: "https://hooks.slack.com/test-webhook"
+    webhook-url: https://hooks.slack.com/test-webhook
   default:
-    recipient: "test-channel"
+    recipient: test-channel
 
-# Test Logging
+# 로깅 레벨 (테스트용)
 logging:
   level:
-    me.rgunny.notification: DEBUG
+    me.rgunny.marketpulse.notification: DEBUG
     io.grpc: WARN

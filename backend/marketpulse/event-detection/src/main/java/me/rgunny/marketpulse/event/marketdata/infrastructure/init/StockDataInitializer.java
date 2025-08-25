@@ -7,6 +7,7 @@ import me.rgunny.marketpulse.event.marketdata.domain.model.MarketType;
 import me.rgunny.marketpulse.event.marketdata.domain.model.Stock;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,11 +18,13 @@ import java.util.List;
  * Stock 데이터 초기화
  * 
  * TODO: 향후 KIS API 종목 마스터 조회 API 연동으로 대체
+ * WatchTargetDataInitializer보다 먼저 실행되도록 @Order(1) 설정
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 @Profile("!test")
+@Order(1)
 public class StockDataInitializer implements CommandLineRunner {
     
     private final StockPort stockPort;

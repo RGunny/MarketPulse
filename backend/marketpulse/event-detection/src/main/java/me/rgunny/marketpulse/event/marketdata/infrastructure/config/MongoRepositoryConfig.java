@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
  * 
  * 해당 서비스에서만 사용하는 Repository 스캔 범위 지정:
  * - marketdata 도메인: Stock, StockPrice Repository (shared 패키지)
+ * - marketdata 도메인: MarketRanking Repository (repository 패키지)
  * - watchlist 도메인: WatchTarget Repository (persistence 패키지)
  */
 @Configuration

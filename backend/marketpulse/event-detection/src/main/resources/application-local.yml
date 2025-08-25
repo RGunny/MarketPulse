@@ -1,0 +1,21 @@
+# ========================================
+# Event Detection - Local Profile
+# ========================================
+
+# 로깅 레벨
+logging:
+  level:
+    me.rgunny.marketpulse.event: DEBUG
+    me.rgunny.marketpulse.common: DEBUG
+    io.grpc: INFO
+    org.springframework.data.mongodb: DEBUG
+
+# 종목 마스터 동기화
+marketpulse:
+  stock-master:
+    sync:
+      enabled: true
+  # 앱 시작시 알림 이력 자동 초기화
+  alert:
+    cleanup:
+      enabled: true
