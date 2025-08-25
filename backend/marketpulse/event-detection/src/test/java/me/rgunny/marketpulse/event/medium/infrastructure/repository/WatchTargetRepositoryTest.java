@@ -3,7 +3,7 @@ package me.rgunny.marketpulse.event.medium.infrastructure.repository;
 import me.rgunny.marketpulse.event.support.MongoTestcontainersTest;
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchCategory;
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchTarget;
-import me.rgunny.marketpulse.event.watchlist.infrastructure.adapter.out.persistence.WatchTargetRepository;
+import me.rgunny.marketpulse.event.watchlist.adapter.out.persistence.WatchTargetRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;

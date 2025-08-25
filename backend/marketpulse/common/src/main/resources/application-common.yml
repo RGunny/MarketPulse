@@ -20,11 +20,7 @@ spring:
     
     # MongoDB 공통 설정
     mongodb:
-      host: ${MONGO_HOST:localhost}
-      port: ${MONGO_PORT:27017}
-      username: ${MONGO_USERNAME:marketpulse_user}
-      password: ${MONGO_PASSWORD:ENC(2IsMMkngNZxntzhLMNDJRy+TtrfzXxX8s8LyuCA1Q9ORvCw2p+q2hbOgrTnJPifnksL9WpnCoAqI6wuJUHbFJg==)}
-      database: ${MONGO_DATABASE:marketpulse}
+      uri: mongodb://${MONGO_USERNAME:marketpulse_user}:${MONGO_PASSWORD:marketpulse_password}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DATABASE:marketpulse}?authSource=${MONGO_DATABASE:marketpulse}
       auto-index-creation: true
 
 # ===== Jasypt 암호화 =====

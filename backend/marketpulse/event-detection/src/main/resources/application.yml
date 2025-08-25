@@ -6,9 +6,31 @@ spring:
   application:
     name: event-detection
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:local}  # 기본값: local
-  config:
-    import: classpath:application-common.yml  # Common 인프라 설정 import
+    active: ${SPRING_PROFILES_ACTIVE:local}
+    
+  # Redis 설정
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+    
+    # MongoDB 설정
+    mongodb:
+      uri: mongodb://${MONGO_USERNAME:marketpulse_user}:${MONGO_PASSWORD:marketpulse_password}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DATABASE:marketpulse}?authSource=${MONGO_DATABASE:marketpulse}
+      auto-index-creation: true
+
+# 암호화 설정
+app:
+  encryption:
+    enabled: true  # CryptoService Bean 활성화
+    master-key: ${MASTER_ENCRYPTION_KEY:a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456}
 
 server:
   port: 8081
@@ -18,8 +40,8 @@ market-data:
   kis:
     enabled: true
     base-url: https://openapi.koreainvestment.com:9443
-    app-key: ${KIS_APP_KEY:PSJl1bIxRyo5KfRppyzDkgOvC7bnH11aNvpJ}
-    app-secret: ${KIS_APP_SECRET:JVhukuuD873hc1Lq8uRXmpYBvLJTyFg6xi+LZD0J6Htaqq+dMBaqdD1yoLdsAAXSFsCKQd9da+LjkPPh4M+sxsQmk5az2TzBfysA8hsfGgB6Fz7gFsyychqP4bkZihRTF7gERsY1QFeHTXEpxpFOUhunQGtyxDIBOoRx2Z/gIzWwbKmWJvU=}
+    app-key: ${KIS_APP_KEY}
+    app-secret: ${KIS_APP_SECRET}
     
     # API 경로 설정
     stock-price-transaction-id: FHKST01010100
@@ -97,7 +119,48 @@ marketpulse:
       failure-threshold: 10.0            # 실패 임계값 (%)
       notification-enabled: true         # 결과 알림
 
-# ===== gRPC 클라이언트 설정 =====
+# 이벤트 감지 설정 (Legacy - 향후 제거 예정)
+event-detection:
+  enabled: false
+  thresholds:
+    price-spike-percent: 5.0    # 5% 이상 급등
+    price-drop-percent: -5.0    # 5% 이상 급락
+    volume-surge-ratio: 2.0     # 평균 대비 200% 이상
+  scheduler:
+    interval: 30s               # 30초마다 감지
+
+# Resilience4j Circuit Breaker 설정
+resilience:
+  circuit-breaker:
+    failure-rate-threshold: 30                    # 30% 실패율에서 Open  
+    slow-call-rate-threshold: 50                  # 50% 느린 호출에서 Open
+    slow-call-duration-threshold: 10s             # 10초 이상이면 느린 호출  
+    permitted-number-of-calls-in-half-open-state: 5
+    sliding-window-size: 50
+    sliding-window-type: COUNT_BASED
+    minimum-number-of-calls: 5
+    wait-duration-in-open-state: 30s              # Open 상태 30초 유지 (빠른 복구)
+    automatic-transition-from-open-to-half-open-enabled: true  # 자동 전환 활성화
+    record-exceptions: true
+    register-health-indicator: true
+
+# Actuator 설정 (Circuit Breaker 모니터링)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  metrics:
+    tags:
+      application: event-detection
+
+# gRPC 클라이언트 설정
 grpc:
   client:
     notification:

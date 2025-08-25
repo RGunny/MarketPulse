@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: alert
+  main:
+    web-application-type: servlet
+  datasource:
+    url: jdbc:mysql://localhost:3306/alert_db
+    username: alert_user
+    password: alert_password
+  jpa:
+    hibernate:
+#      ddl-auto: update
+      ddl-auto: create-drop
+    show-sql: true
+
+server:
+  port: 8083
+
+logging:
+  level:
+    me.rgunny.marketpulse.alert: DEBUG
+
+# CryptoService 비활성화 (alert 모듈에서는 암호화 미사용)
+app:
+  encryption:
+    enabled: false

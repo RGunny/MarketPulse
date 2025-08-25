@@ -15,7 +15,7 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @EnableReactiveMongoRepositories(basePackages = {
     "me.rgunny.marketpulse.event.marketdata.infrastructure.adapter.out.shared",
     "me.rgunny.marketpulse.event.marketdata.infrastructure.repository",
-    "me.rgunny.marketpulse.event.watchlist.infrastructure.adapter.out.persistence"
+    "me.rgunny.marketpulse.event.watchlist.adapter.out.persistence"
 })
 public class MongoRepositoryConfig {
 }

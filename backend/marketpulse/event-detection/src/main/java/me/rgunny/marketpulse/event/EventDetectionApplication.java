@@ -3,7 +3,7 @@ package me.rgunny.marketpulse.event;
 import me.rgunny.marketpulse.event.marketdata.infrastructure.config.kis.KISApiProperties;
 import me.rgunny.marketpulse.event.marketdata.infrastructure.config.shared.StockCollectionProperties;
 import me.rgunny.marketpulse.event.marketdata.infrastructure.config.PriceAlertProperties;
-import me.rgunny.marketpulse.event.watchlist.infrastructure.config.WatchlistProperties;
+import me.rgunny.marketpulse.event.watchlist.adapter.config.WatchlistProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;

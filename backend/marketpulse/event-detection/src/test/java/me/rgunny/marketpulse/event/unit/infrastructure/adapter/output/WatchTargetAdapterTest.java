@@ -2,9 +2,9 @@ package me.rgunny.marketpulse.event.unit.infrastructure.adapter.output;
 
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchCategory;
 import me.rgunny.marketpulse.event.watchlist.domain.model.WatchTarget;
-import me.rgunny.marketpulse.event.watchlist.infrastructure.adapter.out.persistence.WatchTargetRepositoryAdapter;
-import me.rgunny.marketpulse.event.watchlist.infrastructure.config.WatchlistProperties;
-import me.rgunny.marketpulse.event.watchlist.infrastructure.adapter.out.persistence.WatchTargetRepository;
+import me.rgunny.marketpulse.event.watchlist.adapter.out.persistence.WatchTargetRepositoryAdapter;
+import me.rgunny.marketpulse.event.watchlist.adapter.config.WatchlistProperties;
+import me.rgunny.marketpulse.event.watchlist.adapter.out.persistence.WatchTargetRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
