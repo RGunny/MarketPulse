@@ -9,6 +9,9 @@ dependencies {
     // WebFlux (MSA 기본 - Reactive)
     api("org.springframework.boot:spring-boot-starter-webflux")
     
+    // Jasypt for encryption
+    api("com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5")
+    
     // Data Access - MongoDB & Redis (NoSQL 기반)
     api("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     api("org.springframework.boot:spring-boot-starter-data-redis-reactive")

@@ -21,7 +21,7 @@ grpc:
 # ===== 알림 채널 설정 =====
 notification:
   slack:
-    webhook-url: ${SLACK_WEBHOOK_URL:https://hooks.slack.com/services/test}
+    webhook-url: ${SLACK_WEBHOOK_URL}
   
   # 기본 수신자 설정
   default:

@@ -40,8 +40,8 @@ market-data:
   kis:
     enabled: true
     base-url: https://openapi.koreainvestment.com:9443
-    app-key: ${KIS_APP_KEY:PSJl1bIxRyo5KfRppyzDkgOvC7bnH11aNvpJ}
-    app-secret: ${KIS_APP_SECRET:JVhukuuD873hc1Lq8uRXmpYBvLJTyFg6xi+LZD0J6Htaqq+dMBaqdD1yoLdsAAXSFsCKQd9da+LjkPPh4M+sxsQmk5az2TzBfysA8hsfGgB6Fz7gFsyychqP4bkZihRTF7gERsY1QFeHTXEpxpFOUhunQGtyxDIBOoRx2Z/gIzWwbKmWJvU=}
+    app-key: ${KIS_APP_KEY}
+    app-secret: ${KIS_APP_SECRET}
     
     # API 경로 설정
     stock-price-transaction-id: FHKST01010100
