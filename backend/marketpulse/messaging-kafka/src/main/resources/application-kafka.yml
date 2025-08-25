@@ -1,0 +1,33 @@
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: 1  # 리더 브로커만 확인
+      retries: 3
+      properties:
+        max.in.flight.requests.per.connection: 5
+        enable.idempotence: true
+        
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:marketpulse-group}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false  # 수동 커밋으로 안정성 향상
+      properties:
+        spring.json.trusted.packages: "me.rgunny.kafka.marketpulse.dto"
+        session.timeout.ms: 30000
+        
+    listener:
+      ack-mode: manual  # 수동 ACK
+      concurrency: 3  # 컨슈머 스레드 수
+
+# 토픽 설정
+kafka:
+  topics:
+    stock-price: stock-price-events
+    market-ranking: market-ranking-events
+    alert: alert-events
