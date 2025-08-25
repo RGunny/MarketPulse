@@ -49,7 +49,7 @@ subprojects {
     
     // 모듈 타입별 플러그인 적용
     when (name) {
-        "common" -> {
+        "common", "messaging-kafka" -> {
             apply(plugin = "java-library")
         }
         "event-detection", "notification", "alert" -> {
@@ -84,3 +84,8 @@ subprojects {
     }
 }
 
+// Gradle Wrapper 설정
+tasks.wrapper {
+    gradleVersion = "8.10.2"
+    distributionType = Wrapper.DistributionType.BIN
+}

@@ -8,6 +8,9 @@ dependencies {
     // 공통 모듈 (필수 라이브러리 포함)
     implementation(project(":common"))
     
+    // Kafka 메시징 라이브러리
+    implementation(project(":messaging-kafka"))
+    
     // gRPC Client (알림 서비스 통신)
     implementation("net.devh:grpc-client-spring-boot-starter:${rootProject.extra["grpcSpringBoot"]}")
     implementation("io.grpc:grpc-protobuf:${rootProject.extra["grpc"]}")
