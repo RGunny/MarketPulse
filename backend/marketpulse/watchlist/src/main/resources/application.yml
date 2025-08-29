@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: watchlist
+
+resilience4j:
+  circuitbreaker:
+    enabled: false

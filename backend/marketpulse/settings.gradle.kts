@@ -10,6 +10,7 @@ include("messaging-kafka")
 include("event-detection")
 include("alert")
 include("notification")
+include("watchlist")
 // include("llm")  // 아직 미구현
 
 // 향후 추가 예정 모듈

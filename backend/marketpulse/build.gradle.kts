@@ -52,7 +52,7 @@ subprojects {
         "common", "messaging-kafka" -> {
             apply(plugin = "java-library")
         }
-        "event-detection", "notification", "alert" -> {
+        "event-detection", "notification", "alert", "watchlist" -> {
             apply(plugin = "org.springframework.boot")
         }
     }
@@ -86,6 +86,6 @@ subprojects {
 
 // Gradle Wrapper 설정
 tasks.wrapper {
-    gradleVersion = "8.10.2"
+    gradleVersion = "8.14.3"
     distributionType = Wrapper.DistributionType.BIN
 }
