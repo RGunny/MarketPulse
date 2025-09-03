@@ -1,6 +1,22 @@
 spring:
   application:
     name: watchlist
+  datasource:
+    url: jdbc:mysql://localhost:3307/watchlist
+    username: watchlist
+    password: watchlist123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+  docker:
+    compose:
+      lifecycle-management: start_only
+      file: ./watchlist/docker-compose.yml
 
 resilience4j:
   circuitbreaker:

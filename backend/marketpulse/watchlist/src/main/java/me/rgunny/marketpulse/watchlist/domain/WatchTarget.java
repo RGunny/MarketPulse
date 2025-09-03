@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import me.rgunny.marketpulse.watchlist.domain.dto.WatchTargetCreateRequest;
+import me.rgunny.marketpulse.watchlist.domain.dto.WatchTargetRegisterRequest;
 import me.rgunny.marketpulse.watchlist.domain.shared.AbstractEntity;
 
 import java.time.LocalDateTime;
@@ -19,18 +19,16 @@ public class WatchTarget extends AbstractEntity {
 
     private String stockCode;           // 종목코드
     private String stockName;           // 종목명
-    private WatchCategory category;     // 감시 카테고리
     private int collectInterval;        // 수집 주기(초)
     private boolean active;             // 활성화 여부
     private LocalDateTime createdAt;    // 생성일시
     private LocalDateTime updatedAt;    // 수정일시
 
-    public static WatchTarget create(WatchTargetCreateRequest request) {
+    public static WatchTarget register(WatchTargetRegisterRequest request) {
         WatchTarget watchTarget = new WatchTarget();
 
         watchTarget.stockCode = request.stockCode();
         watchTarget.stockName = request.stockName();
-        watchTarget.category = request.category();
         watchTarget.collectInterval = 60;
         watchTarget.active = true;
 
@@ -66,10 +64,6 @@ public class WatchTarget extends AbstractEntity {
 
         this.active = false;
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public void updateCollectInterval(int newInterval) {
-        this.collectInterval = newInterval;
     }
 
 }

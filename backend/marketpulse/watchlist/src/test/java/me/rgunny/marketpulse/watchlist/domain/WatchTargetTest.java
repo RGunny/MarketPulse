@@ -1,6 +1,6 @@
 package me.rgunny.marketpulse.watchlist.domain;
 
-import me.rgunny.marketpulse.watchlist.domain.dto.WatchTargetCreateRequest;
+import me.rgunny.marketpulse.watchlist.domain.dto.WatchTargetRegisterRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,11 +13,11 @@ class WatchTargetTest {
 
     @BeforeEach
     void setUp() {
-        watchTarget = WatchTarget.create(new WatchTargetCreateRequest("00035420060", "NAVER", WatchCategory.CORE));
+        watchTarget = WatchTarget.register(WatchTargetFixture.registerWatchTargetRequest());
     }
 
     @Test
-    void createWatchTarget() {
+    void registerWatchTarget() {
         assertThat(watchTarget.getCreatedAt()).isNotNull();
     }
 

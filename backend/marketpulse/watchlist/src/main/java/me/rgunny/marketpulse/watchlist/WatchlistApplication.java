@@ -8,10 +8,8 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 
 
-@SpringBootApplication(scanBasePackages = "me.rgunny.marketpulse", exclude = {
-        DataSourceAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class
-})public class WatchlistApplication {
+@SpringBootApplication
+public class WatchlistApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(WatchlistApplication.class, args);
