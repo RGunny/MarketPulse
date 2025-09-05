@@ -5,7 +5,7 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      acks: 1  # 리더 브로커만 확인
+      acks: all
       retries: 3
       properties:
         max.in.flight.requests.per.connection: 5

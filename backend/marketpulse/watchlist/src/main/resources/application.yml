@@ -1,6 +1,15 @@
+# ========================================
+# Watchlist Service Configuration
+# ========================================
+server:
+  port: 8084
+
 spring:
   application:
     name: watchlist
+  profiles:
+    active: local
+    include: kafka
   datasource:
     url: jdbc:mysql://localhost:3307/watchlist
     username: watchlist
@@ -17,6 +26,15 @@ spring:
     compose:
       lifecycle-management: start_only
       file: ./watchlist/docker-compose.yml
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+
+kafka:
+  enabled: true
+
+watchlist:
+  kafka:
+    topic: watchlist.events
 
 resilience4j:
   circuitbreaker:

@@ -1,5 +1,6 @@
 dependencies {
     implementation(project(":common"))
+    implementation(project(":messaging-kafka"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
@@ -8,12 +9,11 @@ dependencies {
     
     // Docker Compose support
     developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+
+    // Test
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:mysql")
     testImplementation("org.testcontainers:junit-jupiter")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 // Spring Boot 메인 클래스 설정

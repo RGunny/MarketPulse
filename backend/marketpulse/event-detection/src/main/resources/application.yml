@@ -1,6 +1,8 @@
 # ========================================
 # Event Detection Service Configuration
 # ========================================
+server:
+  port: 8081
 
 spring:
   application:
@@ -31,9 +33,6 @@ app:
   encryption:
     enabled: true  # CryptoService Bean 활성화
     master-key: ${MASTER_ENCRYPTION_KEY:a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456}
-
-server:
-  port: 8081
 
 # ===== KIS API 설정 =====
 market-data:

@@ -26,6 +26,7 @@ HELP.md
 **/out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+backend/*/*.md
 
 ### NetBeans ###
 /nbproject/private/
